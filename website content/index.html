@@ -1,0 +1,2660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lee Pottery — Handthrown in Sydney</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+/* ─── VARIABLES ─────────────────────────────────────────────── */
+:root {
+  --white:  #F2EFE8;
+  --cobalt: #2B3F8C;
+  --indigo: #1A2B6B;
+  --delft:  #4A5FA8;
+  --sky:    #7B9BD4;
+  --clay:   #C4B89A;
+  --dark:   #0A0D1A;
+}
+
+/* ─── RESET & BASE ──────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--white);
+  color: var(--dark);
+  font-family: 'IM Fell English', serif;
+  cursor: none;
+  overflow-x: hidden;
+}
+a { color: inherit; text-decoration: none; cursor: none; }
+img { display: block; width: 100%; height: 100%; object-fit: cover; }
+button, input, textarea { cursor: none; font-family: inherit; }
+
+/* ─── CURSOR ────────────────────────────────────────────────── */
+#cursor-canvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 99999;
+}
+
+/* ─── INTRO SCREEN ──────────────────────────────────────────── */
+#intro {
+  position: fixed;
+  inset: 0;
+  background: var(--white);
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+#intro.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+.intro-brand {
+  text-align: center;
+  pointer-events: none;
+}
+.intro-brand h1 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(3.5rem, 8vw, 6rem);
+  letter-spacing: 0.14em;
+  color: var(--cobalt);
+  line-height: 1;
+}
+.intro-brand h1 span { color: var(--clay); }
+.intro-brand p {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: clamp(0.95rem, 1.8vw, 1.15rem);
+  color: var(--dark);
+  opacity: 0.65;
+  margin-top: 6px;
+  letter-spacing: 0.04em;
+}
+
+#wheel-stage {
+  position: relative;
+  width: min(440px, 84vw);
+  height: min(440px, 84vw);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#wheel-svg {
+  width: 100%; height: 100%;
+  animation: spin-ccw 3.2s linear infinite;
+}
+
+@keyframes spin-ccw {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(-360deg); }
+}
+
+/* Hands come up from below — portrait orientation, rotated inward */
+#hand-left, #hand-right {
+  position: absolute;
+  width: 100px;
+  height: 190px;
+  bottom: -120px;
+  pointer-events: none;
+  z-index: 1;
+  transition: left 0.09s ease-out, right 0.09s ease-out, bottom 0.09s ease-out;
+}
+/* Wrist exits lower-left, fingers angle upper-right toward clay */
+#hand-left  {
+  left: -60px;
+  transform: rotate(6deg);
+  transform-origin: bottom center;
+}
+/* Mirror: wrist exits lower-right, fingers angle upper-left toward clay */
+#hand-right {
+  right: -60px;
+  transform: scaleX(-1) rotate(6deg);
+  transform-origin: bottom center;
+}
+
+#enter-btn {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: none;
+  color: var(--cobalt);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.9rem;
+  letter-spacing: 0.22em;
+  border: none;
+  padding: 0;
+  z-index: 3;
+  transition: opacity 0.2s, transform 0.2s;
+}
+#enter-btn:hover { opacity: 0.65; transform: translate(-50%, -50%) scale(1.1); }
+
+#intro-label {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 0.82rem;
+  color: var(--dark);
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  margin-top: -16px;
+}
+
+/* ─── CREATURE LAYER ────────────────────────────────────────── */
+#creature-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+  overflow: hidden;
+}
+.creature {
+  position: absolute;
+  transform-origin: center center;
+  will-change: transform;
+  opacity: 0.82;
+}
+
+/* ─── HEADER ────────────────────────────────────────────────── */
+#site-header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 48px;
+  height: 72px;
+  transition: background 0.4s, box-shadow 0.4s;
+}
+#site-header.scrolled {
+  background: rgba(250,248,245,0.95);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 1px 0 rgba(43,63,140,0.1);
+}
+.header-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.6rem;
+  letter-spacing: 0.12em;
+  color: var(--cobalt);
+  line-height: 1;
+}
+.header-logo span { color: var(--clay); }
+nav { display: flex; gap: 40px; }
+nav a {
+  font-family: 'IM Fell English', serif;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  color: var(--dark);
+  position: relative;
+  transition: color 0.2s;
+}
+nav a::after {
+  content: '';
+  position: absolute;
+  bottom: -3px; left: 0;
+  width: 0; height: 1px;
+  background: var(--cobalt);
+  transition: width 0.3s ease;
+}
+nav a:hover { color: var(--cobalt); }
+nav a:hover::after { width: 100%; }
+
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  padding: 8px;
+  background: none;
+  border: none;
+}
+.hamburger span {
+  display: block;
+  width: 24px; height: 2px;
+  background: var(--dark);
+  transition: transform 0.3s, opacity 0.3s;
+}
+
+/* ─── HERO ──────────────────────────────────────────────────── */
+#hero {
+  min-height: calc(100vh - 370px);
+  padding-top: 72px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  background: #FAF8F5;
+}
+#speckle-canvas {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+.hero-text {
+  position: relative;
+  z-index: 2;
+  padding: 50px 64px 44px 80px;
+}
+.hero-headline {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(5rem, 9vw, 9rem);
+  line-height: 0.95;
+  letter-spacing: 0.04em;
+  color: var(--cobalt);
+  overflow: hidden;
+}
+.hero-headline .word {
+  display: block;
+  overflow: hidden;
+}
+.hero-headline .word-inner {
+  display: block;
+  transform: translateY(110%);
+  transition: transform 0.7s cubic-bezier(0.22, 0.9, 0.36, 1.0);
+}
+.hero-headline .word-inner.revealed { transform: translateY(0); }
+
+.hero-sub {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.1rem;
+  letter-spacing: 0.2em;
+  color: var(--clay);
+  margin-top: 16px;
+}
+.hero-body {
+  font-size: 1.05rem;
+  line-height: 1.75;
+  color: var(--dark);
+  max-width: 400px;
+  margin-top: 28px;
+  opacity: 0.85;
+}
+.hero-typewriter {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 1.15rem;
+  color: var(--cobalt);
+  margin-top: 32px;
+  min-height: 1.5em;
+  letter-spacing: 0.02em;
+}
+.hero-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 40px;
+  align-items: center;
+}
+.hero-cta {
+  display: inline-block;
+  padding: 14px 40px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1rem;
+  letter-spacing: 0.18em;
+  border: none;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.25s, transform 0.15s, color 0.25s;
+}
+.hero-cta--primary {
+  background: var(--cobalt);
+  color: var(--white);
+}
+.hero-cta--primary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--sky);
+  transform: translateX(-101%);
+  transition: transform 0.35s ease;
+}
+.hero-cta--primary:hover::after { transform: translateX(0); }
+.hero-cta--secondary {
+  background: transparent;
+  color: var(--cobalt);
+  border: 1.5px solid var(--cobalt);
+}
+.hero-cta--secondary:hover {
+  background: var(--cobalt);
+  color: var(--white);
+}
+.hero-cta:hover { transform: translateY(-2px); }
+.hero-cta span { position: relative; z-index: 1; }
+
+.hero-image-wrap {
+  position: relative;
+  z-index: 2;
+  padding: 40px 80px 36px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hero-frame {
+  width: 100%;
+  max-width: 520px;
+  aspect-ratio: 3/4;
+  transform: rotate(-3deg);
+  overflow: hidden;
+  box-shadow: 20px 24px 0 var(--cobalt);
+  will-change: transform;
+}
+.hero-frame img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.3s ease; }
+.hero-img-shaker { width: 100%; height: 100%; }
+@keyframes heroDip {
+  0%   { transform: translateY(0); }
+  45%  { transform: translateY(9px); }
+  55%  { transform: translateY(9px); }
+  100% { transform: translateY(0); }
+}
+.hero-img-shaker.dipping {
+  animation: heroDip 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─── GLAZE DRIP DIVIDER ────────────────────────────────────── */
+.glaze-drip-wrap {
+  display: block;
+  line-height: 0;
+  margin-top: -1px;
+  position: relative;
+  z-index: 2;
+  background-color: #DFD0B8;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='200'%3E%3Cpolygon points='45,30 56,38 45,46 34,38' fill='rgba(105,70,25,0.55)'/%3E%3Cpolygon points='160,122 184,122 176,132 152,132' fill='rgba(135,90,40,0.42)'/%3E%3Cpolygon points='195,73 204,80 195,87 186,80' fill='rgba(80,50,15,0.40)'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='150'%3E%3Cpolygon points='25,50 48,50 41,59 18,59' fill='rgba(80,50,15,0.38)'/%3E%3Cpolygon points='130,110 139,117 130,124 121,117' fill='rgba(105,70,25,0.35)'/%3E%3C/svg%3E");
+  background-size: 240px 200px, 180px 150px;
+  background-position: 0 0, 80px 45px;
+}
+.glaze-drip-wrap svg {
+  width: 100%;
+  display: block;
+}
+
+/* ─── BELOW-HERO — warm stoneware bg with diamond/parallelogram speckles ─── */
+/* Tile A: 2 diamonds + 1 parallelogram */
+/* Tile B: 1 diamond + 1 parallelogram, offset for irregular distribution    */
+#gallery,
+#about,
+.two-up {
+  background-color: #DFD0B8;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='200'%3E%3Cpolygon points='45,30 56,38 45,46 34,38' fill='rgba(105,70,25,0.55)'/%3E%3Cpolygon points='160,122 184,122 176,132 152,132' fill='rgba(135,90,40,0.42)'/%3E%3Cpolygon points='195,73 204,80 195,87 186,80' fill='rgba(80,50,15,0.40)'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='150'%3E%3Cpolygon points='25,50 48,50 41,59 18,59' fill='rgba(80,50,15,0.38)'/%3E%3Cpolygon points='130,110 139,117 130,124 121,117' fill='rgba(105,70,25,0.35)'/%3E%3C/svg%3E");
+  background-size: 240px 200px, 180px 150px;
+  background-position: 0 0, 80px 45px;
+}
+
+/* ─── GALLERY ───────────────────────────────────────────────── */
+#gallery { position: relative; }
+
+/* Full-bleed */
+.full-bleed {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+.full-bleed-img {
+  position: absolute;
+  inset: 0;
+}
+/* Caption-only gradient — just enough to make text readable, no overall darkening */
+.full-bleed-caption-bg {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 200px;
+  background: linear-gradient(to top, rgba(10,13,26,0.55) 0%, transparent 100%);
+  z-index: 1;
+  pointer-events: none;
+}
+.full-bleed-caption {
+  position: absolute;
+  bottom: 64px;
+  left: 64px;
+  z-index: 2;
+  color: var(--white);
+}
+.full-bleed-caption h3 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 3rem;
+  letter-spacing: 0.08em;
+  line-height: 1;
+}
+.full-bleed-caption p {
+  font-style: italic;
+  font-size: 1rem;
+  margin-top: 8px;
+  opacity: 0.85;
+}
+
+/* Two-up magnetic cards */
+.two-up {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  padding: 80px;
+}
+.mag-card {
+  perspective: 900px;
+  position: relative;
+  overflow: hidden;
+}
+.mag-card-inner {
+  aspect-ratio: 3/4;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.15s ease-out;
+  will-change: transform;
+}
+.mag-card-inner img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.mag-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(43,63,140,0.45) 0%, transparent 50%);
+  opacity: 0;
+  transition: opacity 0.4s;
+  display: flex;
+  align-items: flex-end;
+  padding: 24px;
+}
+.mag-card:hover .mag-card-overlay { opacity: 1; }
+.mag-card-label {
+  color: var(--white);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.4rem;
+  letter-spacing: 0.1em;
+}
+
+/* Cobalt interlude */
+.interlude {
+  background: var(--cobalt);
+  padding: 120px 160px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.interlude::before {
+  content: '"';
+  position: absolute;
+  top: -40px; left: 40px;
+  font-family: 'IM Fell English', serif;
+  font-size: 20rem;
+  color: rgba(255,255,255,0.05);
+  line-height: 1;
+  pointer-events: none;
+}
+.interlude blockquote {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: clamp(1.4rem, 2.8vw, 2.2rem);
+  color: var(--white);
+  line-height: 1.55;
+  max-width: 760px;
+  margin: 0 auto;
+}
+.interlude cite {
+  display: block;
+  margin-top: 28px;
+  font-style: normal;
+  font-size: 0.9rem;
+  letter-spacing: 0.15em;
+  color: var(--sky);
+  text-transform: uppercase;
+}
+
+/* Flip cards */
+.flip-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  padding: 0 80px 80px;
+}
+.flip-card {
+  perspective: 1000px;
+  aspect-ratio: 3/4;
+}
+.flip-inner {
+  width: 100%; height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.65s cubic-bezier(0.4, 0.2, 0.2, 1.1);
+}
+.flip-card:hover .flip-inner { transform: rotateY(180deg); }
+.flip-front, .flip-back {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+}
+.flip-front { background: #e8e4db; overflow: hidden; }
+.flip-front img { width: 100%; height: 100%; object-fit: cover; }
+.flip-front-label {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 16px 20px;
+  background: linear-gradient(to top, rgba(10,13,26,0.6), transparent);
+  color: var(--white);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.2rem;
+  letter-spacing: 0.1em;
+}
+.flip-back {
+  background: var(--cobalt);
+  transform: rotateY(180deg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  gap: 16px;
+}
+.flip-back svg { width: 120px; height: 120px; opacity: 0.9; }
+.flip-back-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.6rem;
+  letter-spacing: 0.12em;
+  color: var(--white);
+  text-align: center;
+}
+.flip-back-desc {
+  font-style: italic;
+  font-size: 0.9rem;
+  color: var(--sky);
+  text-align: center;
+  line-height: 1.5;
+}
+.flip-back-price {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.8rem;
+  color: var(--clay);
+  letter-spacing: 0.1em;
+}
+
+/* Drag-scroll row */
+.drag-row-wrap {
+  padding: 60px 0 60px 80px;
+  overflow: hidden;
+  user-select: none;
+}
+.drag-row-label {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.25em;
+  color: var(--clay);
+  margin-bottom: 24px;
+  padding-right: 80px;
+}
+.drag-row-track {
+  display: flex;
+  gap: 24px;
+  width: max-content;
+  transition: transform 0.05s linear;
+  will-change: transform;
+}
+.drag-item {
+  flex: 0 0 260px;
+  height: 360px;
+  overflow: hidden;
+  position: relative;
+  background: #ddd;
+}
+.drag-item img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  transition: transform 0.5s ease;
+}
+.drag-item:hover img { transform: scale(1.04); }
+.drag-item-label {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 12px 16px;
+  background: linear-gradient(to top, rgba(10,13,26,0.65), transparent);
+  color: var(--white);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1rem;
+  letter-spacing: 0.1em;
+}
+
+/* ─── KILN GALLERY ─────────────────────────────────────────── */
+.kiln-scene {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 36px;
+  padding: 40px 24px 100px;
+  background: transparent;
+}
+.kiln-heading {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(1.6rem, 3.5vw, 2.8rem);
+  letter-spacing: 0.08em;
+  color: var(--cobalt);
+  text-align: center;
+}
+.kiln-body {
+  position: relative;
+  width: clamp(280px, 40vw, 480px);
+  height: clamp(340px, 50vw, 580px);
+  background: #5c6e7e;
+  border-radius: 10px 10px 5px 5px;
+  box-shadow:
+    0 0 0 4px #3e5060,
+    8px 20px 70px rgba(0,0,0,0.75),
+    inset 0 1px 0 rgba(200,220,240,0.12);
+}
+.kiln-interior {
+  position: absolute;
+  inset: 10px;
+  background-color: #b8844a;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='84' height='38'%3E%3Crect width='84' height='38' fill='%23a87840'/%3E%3Crect x='1' y='1' width='40' height='16' fill='%23d0a060' rx='1'/%3E%3Crect x='43' y='1' width='40' height='16' fill='%23c89050' rx='1'/%3E%3Crect x='-21' y='19' width='40' height='16' fill='%23c89858' rx='1'/%3E%3Crect x='21' y='19' width='40' height='16' fill='%23d4a465' rx='1'/%3E%3Crect x='63' y='19' width='22' height='16' fill='%23c89050' rx='1'/%3E%3C/svg%3E");
+  border-radius: 4px;
+  box-shadow: inset 0 0 50px rgba(0,0,0,0.45);
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.kiln-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 60%, rgba(255,160,50,0.22) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 2;
+}
+.kiln-elems {
+  position: absolute;
+  top: 8%; bottom: 8%;
+  width: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  z-index: 1;
+}
+.kiln-elems-l { left: 4px; }
+.kiln-elems-r { right: 4px; }
+.kiln-elems i {
+  display: block;
+  width: 100%;
+  height: 4px;
+  background: #222;
+  border-radius: 2px;
+  box-shadow: 0 0 4px rgba(255,140,40,0.15);
+  font-style: normal;
+}
+.kiln-slideshow {
+  position: absolute;
+  left: 28px; right: 28px;
+  top: 18px; bottom: 18px;
+  z-index: 3;
+  border-radius: 2px;
+  overflow: hidden;
+  box-shadow: inset 0 0 0 3px rgba(0,0,0,0.4);
+}
+/* Vignette — kills the "lightbox" look, makes it feel like a chamber */
+.kiln-slideshow::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 58%, rgba(14,8,2,0.75) 100%);
+  z-index: 10;
+  pointer-events: none;
+}
+.kiln-slide {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.9s ease;
+  filter: brightness(0.85) contrast(0.87) saturate(0.9);
+}
+.kiln-slide.active { opacity: 1; }
+/* Door — hinged on left edge */
+.kiln-door-wrap {
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+  transform-style: preserve-3d;
+  transform: perspective(1600px) rotateY(0deg);
+  transition: transform 1.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+  border-radius: 10px 10px 5px 5px;
+}
+.kiln-door-wrap.open {
+  transform: perspective(1600px) rotateY(-128deg);
+}
+.kiln-door-front {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, #506070 0%, #3e5060 100%);
+  border-radius: 10px 10px 5px 5px;
+  border: 2px solid #6a7e8e;
+  box-shadow: inset 0 1px 0 rgba(200,220,240,0.1), inset 0 -1px 0 rgba(0,0,0,0.2);
+}
+/* When the door wrapper gets .open, fade the front face away after rotation completes.
+   Pure CSS sibling selector — no JS opacity needed, no preserve-3d interference. */
+@keyframes kiln-front-hide {
+  to { opacity: 0; pointer-events: none; }
+}
+.kiln-door-wrap.open ~ .kiln-door-front {
+  animation: kiln-front-hide 0.3s ease 1.5s forwards;
+}
+.kdf-inner-frame {
+  position: absolute;
+  inset: 16px;
+  border: 2px solid #364d5c;
+  border-radius: 4px;
+  box-shadow: inset 0 2px 10px rgba(0,0,0,0.35);
+}
+.kdf-hinge {
+  position: absolute;
+  left: -3px;
+  width: 14px; height: 32px;
+  background: linear-gradient(90deg, #7a8e9e, #a0b4c4);
+  border-radius: 3px;
+  box-shadow: 1px 0 4px rgba(0,0,0,0.5);
+}
+.kdf-hinge-t { top: 13%; }
+.kdf-hinge-b { bottom: 13%; }
+.kdf-peep {
+  position: absolute;
+  right: 18px;
+  width: 13px; height: 13px;
+  border-radius: 50%;
+  background: #111820;
+  border: 2px solid #364d5c;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.7);
+}
+.kdf-peep-t { top: 27%; }
+.kdf-peep-b { bottom: 28%; }
+.kdf-latch {
+  position: absolute;
+  right: 8px;
+  width: 30px;
+}
+.kdf-latch-t { top: 20%; }
+.kdf-latch-b { bottom: 20%; }
+.kdf-latch-bar {
+  width: 100%; height: 10px;
+  background: linear-gradient(180deg, #9ab0c0, #7a8e9e);
+  border-radius: 3px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.45);
+}
+.kiln-door-back {
+  position: absolute;
+  inset: 0;
+  transform: rotateY(180deg);
+  backface-visibility: hidden;
+  /* Slightly more heat-stained orange than the walls */
+  background-color: #a87848;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='84' height='38'%3E%3Crect width='84' height='38' fill='%239a6e38'/%3E%3Crect x='1' y='1' width='40' height='16' fill='%23c09050' rx='1'/%3E%3Crect x='43' y='1' width='40' height='16' fill='%23b88045' rx='1'/%3E%3Crect x='-21' y='19' width='40' height='16' fill='%23ba884e' rx='1'/%3E%3Crect x='21' y='19' width='40' height='16' fill='%23c49858' rx='1'/%3E%3Crect x='63' y='19' width='22' height='16' fill='%23b88045' rx='1'/%3E%3C/svg%3E");
+  border-radius: 10px 10px 5px 5px;
+  /* Edge shadows suggest the 6cm thickness of insulation brick */
+  box-shadow:
+    inset 6px 0 18px rgba(0,0,0,0.35),
+    inset -6px 0 18px rgba(0,0,0,0.25),
+    inset 0 6px 18px rgba(0,0,0,0.3),
+    inset 0 -6px 18px rgba(0,0,0,0.2);
+}
+/* Spy holes — go all the way through, dark tunnels visible from both sides */
+.kiln-door-back::before,
+.kiln-door-back::after {
+  content: '';
+  position: absolute;
+  left: 18px;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #050810 40%, #0e1420 100%);
+  border: 3px solid #7a5828;
+  box-shadow: inset 0 3px 8px rgba(0,0,0,0.9), 0 0 6px rgba(0,0,0,0.5);
+}
+.kiln-door-back::before { top: 27%; }
+.kiln-door-back::after  { bottom: 28%; }
+
+/* ─── SHELF GALLERY ─────────────────────────────────────────── */
+.shelf-section {
+  background: #DFD0B8;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='200'%3E%3Cpolygon points='45,30 56,38 45,46 34,38' fill='rgba(43,63,140,0.13)'/%3E%3Cpolygon points='160,122 184,122 176,132 152,132' fill='rgba(43,63,140,0.09)'/%3E%3C/svg%3E");
+  background-size: 240px 200px;
+}
+.shelf-toggle-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 0 24px 48px;
+}
+.shelf-nav-btn {
+  font-family: 'IM Fell English', serif;
+  font-size: 1.6rem;
+  line-height: 1;
+  color: var(--cobalt);
+  background: none;
+  border: 1.5px solid var(--cobalt);
+  width: 38px; height: 38px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: none;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, background 0.2s ease, color 0.2s ease;
+}
+.shelf-nav-btn:hover { background: var(--cobalt); color: var(--white); }
+.shelf-nav-btn:disabled { opacity: 0.25 !important; pointer-events: none; }
+.shelf-section.open .shelf-nav-btn { opacity: 1; pointer-events: all; }
+.shelf-page-info {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 0.8rem;
+  color: var(--cobalt);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  min-width: 44px;
+  text-align: center;
+}
+.shelf-section.open .shelf-page-info { opacity: 0.7; }
+.shelf-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1rem;
+  letter-spacing: 0.16em;
+  color: var(--cobalt);
+  background: none;
+  border: 1.5px solid var(--cobalt);
+  padding: 11px 28px;
+  cursor: none;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.shelf-toggle-btn:hover { background: var(--cobalt); color: var(--white); }
+.shelf-arrow {
+  display: inline-block;
+  transition: transform 0.35s ease;
+  font-size: 0.75rem;
+}
+.shelf-toggle-btn.open .shelf-arrow { transform: rotate(180deg); }
+.shelf-panel {
+  overflow: hidden;
+  height: 0;
+  transition: height 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.shelf-wrap {
+  padding: 20px 48px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+.shelf-row {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 12px;
+  padding-bottom: 14px;
+}
+/* Wooden shelf ledge */
+.shelf-row::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: -20px; right: -20px;
+  height: 12px;
+  background: linear-gradient(180deg, #c8a060 0%, #b08840 55%, #8a6828 100%);
+  border-radius: 2px 2px 4px 4px;
+  box-shadow: 0 5px 14px rgba(0,0,0,0.28), 0 2px 4px rgba(0,0,0,0.18);
+}
+.shelf-item {
+  position: relative;
+  flex: 0 0 auto;
+  cursor: none;
+  transition: transform 0.22s ease;
+}
+.shelf-item:hover { transform: translateY(-7px); }
+/* Pot shadow on the shelf surface */
+.shelf-item::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%; transform: translateX(-50%);
+  width: 70%; height: 8px;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0.22) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.shelf-item img {
+  display: block;
+  width: auto;
+  object-fit: contain;
+  object-position: bottom center;
+  filter: drop-shadow(1px 6px 5px rgba(0,0,0,0.22));
+}
+/* Staggered heights — feels like a real shelf of different-sized pots */
+.shelf-item:nth-child(1)  img { height: 168px; }
+.shelf-item:nth-child(2)  img { height: 200px; }
+.shelf-item:nth-child(3)  img { height: 155px; }
+.shelf-item:nth-child(4)  img { height: 185px; }
+.shelf-item:nth-child(5)  img { height: 210px; }
+.shelf-spacer { padding-bottom: 36px; }
+/* Lightbox */
+.shelf-lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(10,13,26,0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.shelf-lightbox.active {
+  opacity: 1;
+  pointer-events: all;
+}
+.shelf-lb-img {
+  max-width: 88vw;
+  max-height: 88vh;
+  object-fit: contain;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+  display: block;
+}
+.shelf-lb-close {
+  position: absolute;
+  top: 24px; right: 28px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.4rem;
+  letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.7);
+  background: none;
+  border: none;
+  cursor: none;
+  transition: color 0.15s;
+}
+.shelf-lb-close:hover { color: #fff; }
+
+/* ─── ABOUT ─────────────────────────────────────────────────── */
+#about {
+  display: block;
+  position: relative;
+  padding-top: 56px; /* stoneware strip above top drip */
+}
+
+/* White glaze blob — contains the grid + cobalt speckles */
+.about-glaze-blob {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  min-height: 90vh;
+  background-color: #FAF8F5;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='200'%3E%3Cpolygon points='45,30 56,38 45,46 34,38' fill='rgba(43,63,140,0.13)'/%3E%3Cpolygon points='160,122 184,122 176,132 152,132' fill='rgba(43,63,140,0.09)'/%3E%3Cpolygon points='195,73 204,80 195,87 186,80' fill='rgba(43,63,140,0.11)'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='150'%3E%3Cpolygon points='25,50 48,50 41,59 18,59' fill='rgba(43,63,140,0.09)'/%3E%3Cpolygon points='130,110 139,117 130,124 121,117' fill='rgba(43,63,140,0.12)'/%3E%3C/svg%3E");
+  background-size: 240px 200px, 180px 150px;
+  background-position: 0 0, 80px 45px;
+}
+
+/* Drip edges — siblings of the blob, NOT inside the grid.
+   Transparent SVG areas show through to #about's stoneware background,
+   making the white drip tips visible against it. */
+.about-blob-drip {
+  line-height: 0;
+  margin: -1px 0; /* eliminate hairline gaps */
+}
+.about-blob-drip svg {
+  width: 100%;
+  display: block;
+}
+.about-image-wrap {
+  padding: 80px 40px 80px 80px;
+  position: relative;
+}
+.about-img-inner {
+  aspect-ratio: 3/4;
+  overflow: hidden;
+  box-shadow: -20px 20px 0 var(--cobalt);
+}
+.about-text {
+  padding: 80px 80px 80px 60px;
+}
+.about-eyebrow {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.3em;
+  color: var(--clay);
+  margin-bottom: 20px;
+}
+.about-headline {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(3rem, 5vw, 4.5rem);
+  line-height: 1;
+  letter-spacing: 0.05em;
+  color: var(--cobalt);
+  margin-bottom: 32px;
+}
+.about-body {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: var(--dark);
+  opacity: 0.85;
+}
+.about-body p + p { margin-top: 20px; }
+
+/* ─── CONTACT ───────────────────────────────────────────────── */
+#contact {
+  background: var(--dark);
+  padding: 120px 80px;
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.contact-headline {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(5rem, 10vw, 10rem);
+  line-height: 0.9;
+  letter-spacing: 0.04em;
+  color: var(--white);
+  margin-bottom: 8px;
+}
+.contact-headline .slash { color: var(--cobalt); }
+.contact-sub {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 1.2rem;
+  color: var(--sky);
+  margin-bottom: 64px;
+  letter-spacing: 0.04em;
+}
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  max-width: 720px;
+}
+.contact-grid input,
+.contact-grid textarea {
+  background: transparent;
+  border: 1px solid rgba(123,155,212,0.3);
+  color: var(--white);
+  padding: 16px 20px;
+  font-size: 0.95rem;
+  font-family: 'IM Fell English', serif;
+  outline: none;
+  transition: border-color 0.25s;
+  width: 100%;
+}
+.contact-grid input::placeholder,
+.contact-grid textarea::placeholder { color: rgba(123,155,212,0.5); }
+.contact-grid input:focus,
+.contact-grid textarea:focus { border-color: var(--cobalt); }
+.contact-grid .full { grid-column: 1 / -1; }
+.contact-grid textarea { resize: vertical; min-height: 160px; }
+.contact-submit {
+  grid-column: 1 / -1;
+  align-self: start;
+  background: var(--cobalt);
+  color: var(--white);
+  border: none;
+  padding: 16px 48px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1rem;
+  letter-spacing: 0.2em;
+  transition: background 0.25s, transform 0.15s;
+}
+.contact-submit:hover { background: var(--delft); transform: translateY(-2px); }
+
+/* ─── FOOTER ────────────────────────────────────────────────── */
+footer {
+  background: var(--dark);
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding: 48px 80px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.footer-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.4rem;
+  letter-spacing: 0.12em;
+  color: var(--white);
+}
+.footer-tagline {
+  font-style: italic;
+  font-size: 0.9rem;
+  color: var(--clay);
+}
+.footer-copy {
+  font-size: 0.78rem;
+  color: rgba(123,155,212,0.45);
+  letter-spacing: 0.05em;
+}
+
+/* ─── SCROLL REVEAL ─────────────────────────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(36px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.35s; }
+.reveal-delay-4 { transition-delay: 0.5s; }
+
+/* ─── MOBILE ────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  #site-header { padding: 0 24px; }
+  nav { display: none; }
+  nav.open {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    inset: 72px 0 0;
+    background: var(--white);
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    z-index: 99;
+    font-size: 2rem;
+  }
+  .hamburger { display: flex; }
+
+  #hero { grid-template-columns: 1fr; padding-top: 72px; }
+  .hero-text { padding: 40px 24px; }
+  .hero-image-wrap { padding: 0 24px 48px; }
+  .hero-frame { max-width: 100%; transform: none; box-shadow: 12px 14px 0 var(--cobalt); }
+
+  .kiln-body { width: 88vw; height: 110vw; }
+
+  .interlude { padding: 80px 32px; }
+
+  .about-glaze-blob { grid-template-columns: 1fr; }
+  .about-image-wrap { padding: 60px 24px 0; }
+  .about-text { padding: 40px 24px 60px; }
+  .about-img-inner { box-shadow: -12px 12px 0 var(--cobalt); }
+
+  #contact { padding: 80px 24px; }
+  .contact-grid { grid-template-columns: 1fr; }
+  .contact-headline { font-size: clamp(3.5rem, 14vw, 6rem); }
+
+  footer { flex-direction: column; gap: 16px; text-align: center; padding: 40px 24px; }
+
+  .drag-row-wrap { padding: 40px 0 40px 24px; }
+  .full-bleed-caption { left: 24px; bottom: 40px; }
+
+  .interlude { padding: 80px 24px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ─── CURSOR CANVAS ──────────────────────────────────────── -->
+<canvas id="cursor-canvas"></canvas>
+
+<!-- ─── INTRO SCREEN ──────────────────────────────────────── -->
+<div id="intro">
+
+  <!-- Branding above wheel -->
+  <div class="intro-brand">
+    <h1>Lee<span>.</span>Pottery</h1>
+    <p>Original handthrown ceramics &mdash; illustrated &amp; fired in Sydney</p>
+  </div>
+
+  <div id="wheel-stage">
+
+    <!-- Pottery wheel SVG -->
+    <svg id="wheel-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" style="position:absolute;top:0;left:0;width:100%;height:100%;">
+      <!-- Outer rim -->
+      <circle cx="200" cy="200" r="192" fill="#e8e2d5" stroke="#C4B89A" stroke-width="6"/>
+      <!-- Speckles on wheel -->
+      <circle cx="120" cy="130" r="2.5" fill="#2B3F8C" opacity="0.25"/>
+      <circle cx="280" cy="160" r="2"   fill="#2B3F8C" opacity="0.2"/>
+      <circle cx="160" cy="290" r="3"   fill="#2B3F8C" opacity="0.2"/>
+      <circle cx="310" cy="270" r="2"   fill="#2B3F8C" opacity="0.25"/>
+      <circle cx="90"  cy="240" r="2.5" fill="#2B3F8C" opacity="0.18"/>
+      <circle cx="240" cy="100" r="2"   fill="#2B3F8C" opacity="0.22"/>
+      <circle cx="340" cy="200" r="1.5" fill="#2B3F8C" opacity="0.2"/>
+      <circle cx="70"  cy="175" r="2"   fill="#2B3F8C" opacity="0.2"/>
+      <circle cx="200" cy="330" r="2.5" fill="#2B3F8C" opacity="0.18"/>
+      <circle cx="155" cy="80"  r="2"   fill="#2B3F8C" opacity="0.22"/>
+      <!-- Concentric grooves suggesting spinning -->
+      <circle cx="200" cy="200" r="155" fill="none" stroke="#C4B89A" stroke-width="1.5" opacity="0.4"/>
+      <circle cx="200" cy="200" r="120" fill="none" stroke="#C4B89A" stroke-width="1.2" opacity="0.35"/>
+      <circle cx="200" cy="200" r="85"  fill="none" stroke="#C4B89A" stroke-width="1" opacity="0.3"/>
+      <!-- Bat (flat disk) -->
+      <circle cx="200" cy="200" r="192" fill="none" stroke="#b8ad97" stroke-width="3" opacity="0.5"/>
+      <!-- Clay blob in center -->
+      <ellipse id="clay-blob"  cx="200" cy="200" rx="56" ry="52" fill="#d4c9b0" stroke="#C4B89A" stroke-width="3"/>
+      <!-- Clay form suggestions -->
+      <ellipse id="clay-ring1" cx="200" cy="200" rx="38" ry="34" fill="none" stroke="#C4B89A" stroke-width="1.5" opacity="0.6"/>
+      <ellipse id="clay-ring2" cx="200" cy="200" rx="22" ry="18" fill="none" stroke="#C4B89A" stroke-width="1" opacity="0.4"/>
+      <!-- center dot -->
+      <circle cx="200" cy="200" r="5" fill="#C4B89A" opacity="0.7"/>
+    </svg>
+
+    <!--
+      LEFT HAND — portrait SVG (100×190), wrist at bottom, fingers pointing up.
+      CSS rotates it 16° so wrist exits lower-left, fingertips reach upper-right (toward clay).
+      Thumb is on the RIGHT side of the palm — correct for a left hand with palm facing viewer.
+      Right hand uses scaleX(-1) so thumb flips to left side (correct for right hand).
+    -->
+    <svg id="hand-left" viewBox="0 0 100 190" xmlns="http://www.w3.org/2000/svg">
+      <!-- Forearm / wrist stub at bottom -->
+      <path d="M 28 190 Q 28 172 32 162 Q 36 154 42 152 Q 52 150 60 154 Q 66 158 68 168 L 68 190"
+            fill="#d4b896" stroke="#b8906c" stroke-width="2.5" stroke-linejoin="round"/>
+      <!-- Wrist crease -->
+      <path d="M 30 165 Q 48 160 66 165" fill="none" stroke="#b8906c" stroke-width="1.2" opacity="0.45"/>
+
+      <!-- Palm body -->
+      <path d="M 32 155 Q 24 144 22 130 Q 20 114 26 104 Q 32 96 44 94 Q 58 92 68 100 Q 78 110 76 126 Q 74 142 64 152 Q 56 158 44 158 Z"
+            fill="#d4b896" stroke="#b8906c" stroke-width="2.5" stroke-linejoin="round"/>
+      <!-- Palm life-line -->
+      <path d="M 34 134 Q 44 126 56 130" fill="none" stroke="#b8906c" stroke-width="1.3" opacity="0.42"/>
+      <!-- Knuckle line at finger base -->
+      <path d="M 28 100 Q 44 94 60 100" fill="none" stroke="#b8906c" stroke-width="1.2" opacity="0.4"/>
+
+      <!-- THUMB — right side of palm, pointing upper-right (toward clay) -->
+      <!-- This is on the radial/thumb side of a left hand when palm faces viewer -->
+      <path d="M 72 116 Q 84 104 90 90 Q 94 78 88 68 Q 82 60 74 66 Q 68 74 68 88 L 68 108"
+            fill="#d4b896" stroke="#b8906c" stroke-width="2.5" stroke-linejoin="round"/>
+      <!-- Thumb knuckle -->
+      <path d="M 80 92 Q 84 88 88 92" fill="none" stroke="#b8906c" stroke-width="1.2" opacity="0.5"/>
+
+      <!-- INDEX FINGER — rightmost, slightly longer -->
+      <path d="M 68 98 Q 72 80 72 58 Q 72 40 64 32 Q 56 26 50 34 Q 44 44 48 62 L 52 96"
+            fill="#d4b896" stroke="#b8906c" stroke-width="2.3" stroke-linejoin="round"/>
+      <!-- MIDDLE FINGER — center, longest -->
+      <path d="M 52 96 Q 50 76 48 54 Q 46 36 38 30 Q 30 26 26 36 Q 22 48 28 66 L 34 96"
+            fill="#d4b896" stroke="#b8906c" stroke-width="2.3" stroke-linejoin="round"/>
+      <!-- RING FINGER -->
+      <path d="M 34 97 Q 30 80 28 62 Q 26 46 18 44 Q 10 44 10 56 Q 10 70 16 84 L 24 98"
+            fill="#d4b896" stroke="#b8906c" stroke-width="2.2" stroke-linejoin="round"/>
+      <!-- LITTLE FINGER — shortest, leftmost -->
+      <path d="M 24 99 Q 18 86 18 72 Q 18 62 12 62 Q 6 64 6 76 Q 6 88 14 98 L 20 104"
+            fill="#d4b896" stroke="#b8906c" stroke-width="2" stroke-linejoin="round" opacity="0.92"/>
+
+      <!-- Knuckle bumps on finger backs -->
+      <path d="M 48 98 Q 52 93 56 98" fill="none" stroke="#b8906c" stroke-width="1.2" opacity="0.55"/>
+      <path d="M 32 98 Q 36 93 40 98" fill="none" stroke="#b8906c" stroke-width="1.2" opacity="0.55"/>
+      <path d="M 18 100 Q 21 96 24 100" fill="none" stroke="#b8906c" stroke-width="1.2" opacity="0.5"/>
+      <!-- Finger mid-knuckle hints -->
+      <path d="M 50 75 Q 53 71 57 75" fill="none" stroke="#b8906c" stroke-width="1" opacity="0.38"/>
+      <path d="M 28 74 Q 31 70 34 74" fill="none" stroke="#b8906c" stroke-width="1" opacity="0.38"/>
+    </svg>
+
+    <!-- RIGHT HAND — same SVG mirrored horizontally with CSS scaleX(-1).
+         After mirroring: thumb moves to LEFT side = correct for a right hand palm-facing-viewer.
+         CSS on #hand-right applies: scaleX(-1) then rotate(16deg) -->
+    <svg id="hand-right" viewBox="0 0 100 190" xmlns="http://www.w3.org/2000/svg">
+      <path d="M 28 190 Q 28 172 32 162 Q 36 154 42 152 Q 52 150 60 154 Q 66 158 68 168 L 68 190"
+            fill="#d4b896" stroke="#b8906c" stroke-width="2.5" stroke-linejoin="round"/>
+      <path d="M 30 165 Q 48 160 66 165" fill="none" stroke="#b8906c" stroke-width="1.2" opacity="0.45"/>
+      <path d="M 32 155 Q 24 144 22 130 Q 20 114 26 104 Q 32 96 44 94 Q 58 92 68 100 Q 78 110 76 126 Q 74 142 64 152 Q 56 158 44 158 Z"
+            fill="#d4b896" stroke="#b8906c" stroke-width="2.5" stroke-linejoin="round"/>
+      <path d="M 34 134 Q 44 126 56 130" fill="none" stroke="#b8906c" stroke-width="1.3" opacity="0.42"/>
+      <path d="M 28 100 Q 44 94 60 100" fill="none" stroke="#b8906c" stroke-width="1.2" opacity="0.4"/>
+      <path d="M 72 116 Q 84 104 90 90 Q 94 78 88 68 Q 82 60 74 66 Q 68 74 68 88 L 68 108"
+            fill="#d4b896" stroke="#b8906c" stroke-width="2.5" stroke-linejoin="round"/>
+      <path d="M 80 92 Q 84 88 88 92" fill="none" stroke="#b8906c" stroke-width="1.2" opacity="0.5"/>
+      <path d="M 68 98 Q 72 80 72 58 Q 72 40 64 32 Q 56 26 50 34 Q 44 44 48 62 L 52 96"
+            fill="#d4b896" stroke="#b8906c" stroke-width="2.3" stroke-linejoin="round"/>
+      <path d="M 52 96 Q 50 76 48 54 Q 46 36 38 30 Q 30 26 26 36 Q 22 48 28 66 L 34 96"
+            fill="#d4b896" stroke="#b8906c" stroke-width="2.3" stroke-linejoin="round"/>
+      <path d="M 34 97 Q 30 80 28 62 Q 26 46 18 44 Q 10 44 10 56 Q 10 70 16 84 L 24 98"
+            fill="#d4b896" stroke="#b8906c" stroke-width="2.2" stroke-linejoin="round"/>
+      <path d="M 24 99 Q 18 86 18 72 Q 18 62 12 62 Q 6 64 6 76 Q 6 88 14 98 L 20 104"
+            fill="#d4b896" stroke="#b8906c" stroke-width="2" stroke-linejoin="round" opacity="0.92"/>
+      <path d="M 48 98 Q 52 93 56 98" fill="none" stroke="#b8906c" stroke-width="1.2" opacity="0.55"/>
+      <path d="M 32 98 Q 36 93 40 98" fill="none" stroke="#b8906c" stroke-width="1.2" opacity="0.55"/>
+      <path d="M 18 100 Q 21 96 24 100" fill="none" stroke="#b8906c" stroke-width="1.2" opacity="0.5"/>
+      <path d="M 50 75 Q 53 71 57 75" fill="none" stroke="#b8906c" stroke-width="1" opacity="0.38"/>
+      <path d="M 28 74 Q 31 70 34 74" fill="none" stroke="#b8906c" stroke-width="1" opacity="0.38"/>
+    </svg>
+
+    <button id="enter-btn">ENTER</button>
+  </div>
+
+  <p id="intro-label">Move your cursor to the clay &mdash; then enter</p>
+</div>
+
+<!-- ─── MAIN SITE ───────────────────────────────────────────── -->
+<div id="main-site" style="opacity:0;transition:opacity 0.8s ease;">
+
+<!-- ─── CREATURE LAYER ──────────────────────────────────────── -->
+<div id="creature-layer">
+
+  <!--
+    CREATURES — redrawn from reference images.
+    All use loose, gestural brushwork style consistent with Richard's actual ceramic illustrations.
+    Stroke-linecap/linejoin: round throughout for painted feel.
+    Colour: cobalt #2B3F8C on off-white, matching the pottery palette.
+  -->
+
+  <!-- SWAN LARGE -->
+  <div class="creature" id="cr-swan-large">
+    <img src="website photos/animations/swan.png" alt="Swan" style="display:block;width:78px;height:62px;">
+  </div>
+
+  <!-- SWAN SMALL (cygnet) -->
+  <div class="creature" id="cr-cygnet">
+    <img src="website photos/animations/swan.png" alt="Swan (cygnet)" style="display:block;width:46px;height:38px;">
+  </div>
+
+  <!-- CROCODILE -->
+  <div class="creature" id="cr-croc">
+    <img src="website photos/animations/crocodile.png" alt="Crocodile" style="display:block;width:96px;height:48px;">
+  </div>
+
+  <!-- CRAB -->
+  <div class="creature" id="cr-crab">
+    <img src="website photos/animations/crab.png?v=3" alt="Crab" style="display:block;width:64px;height:64px;">
+  </div>
+
+  <!-- SNAKE -->
+  <div class="creature" id="cr-snake">
+    <img src="website photos/animations/snake.png" alt="Snake" style="display:block;width:58px;height:52px;">
+  </div>
+
+</div><!-- end creature layer -->
+
+<!-- ─── SITE HEADER ─────────────────────────────────────────── -->
+<header id="site-header">
+  <a href="#" class="header-logo">Lee<span>.</span>Pottery</a>
+  <nav id="main-nav">
+    <a href="#gallery">Work</a>
+    <a href="#about">About</a>
+    <a href="#contact">Commission</a>
+  </nav>
+  <button class="hamburger" id="hamburger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+
+<!-- ─── HERO ────────────────────────────────────────────────── -->
+<section id="hero">
+  <canvas id="speckle-canvas"></canvas>
+
+  <div class="hero-text">
+    <div class="hero-headline" aria-label="DRAWN FROM LIFE">
+      <div class="word"><span class="word-inner" data-word="0">DRAWN</span></div>
+      <div class="word"><span class="word-inner" data-word="1">FROM</span></div>
+      <div class="word"><span class="word-inner" data-word="2">LIFE</span></div>
+    </div>
+    <p class="hero-sub">Handthrown in Sydney</p>
+    <p class="hero-body">Every piece carries a story — painted freehand before the kiln. Swans, serpents, crabs and creatures pulled from memory and pressed into clay.</p>
+    <div class="hero-typewriter" id="typewriter"></div>
+    <div class="hero-ctas">
+      <a href="#contact" class="hero-cta hero-cta--primary"><span>Commission a piece</span></a>
+      <a href="#contact" class="hero-cta hero-cta--secondary"><span>Get in touch</span></a>
+    </div>
+  </div>
+
+  <div class="hero-image-wrap">
+    <div class="hero-frame" id="hero-frame">
+      <div class="hero-img-shaker" id="hero-img-shaker">
+        <img id="hero-img" src="website photos/hero images/20251219_131248.jpg"
+             alt="Swan collection — Lee Pottery" loading="eager">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── GLAZE DRIP DIVIDER ──────────────────────────────────── -->
+<div class="glaze-drip-wrap">
+  <!--
+    Glaze drip SVG — cobalt glaze band drips organically into the stoneware section below.
+    Single continuous spline trace (not repeated shapes) with horizontal tangents at peaks/troughs
+    and asymmetric control points (tight at peaks, wide at troughs) for natural glaze-flow character.
+  -->
+  <svg viewBox="0 0 1440 170" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <!-- Stoneware background — transparent so CSS speckle bg shows through -->
+    <rect width="1440" height="170" fill="none"/>
+    <!-- Hero colour: seamless top band -->
+    <rect width="1440" height="45" fill="#FAF8F5"/>
+    <!-- Cobalt glaze drip: band from y=35, organic drip edge below -->
+    <path d="
+      M 0,35 H 1440 V 50
+      C 1440,95   1396,128  1360,128
+      C 1325,128  1291,52   1282,52
+      C 1272,52   1237,96   1200,96
+      C 1172,96   1145,53   1138,53
+      C 1126,53   1085,148  1042,148
+      C 1004,148   968,52    958,52
+      C  950,52    920,82    888,82
+      C  856,82    825,51    816,51
+      C  806,51    770,138   732,138
+      C  694,138   658,52    648,52
+      C  637,52    600,112   560,112
+      C  515,112   472,51    460,51
+      C  449,51    411,158   370,158
+      C  320,158   271,52    258,52
+      C  249,52    216,98    182,98
+      C  147,98    114,51    105,51
+      C   98,51     74,118    48,118
+      C   26,118     7,50      0,50
+      Z
+    " fill="#FAF8F5"/>
+  </svg>
+</div>
+
+<!-- ─── GALLERY ─────────────────────────────────────────────── -->
+<section id="gallery">
+
+  <!-- Kiln Gallery -->
+  <div class="kiln-scene" id="kiln-scene">
+    <p class="kiln-heading">highlights from the kiln</p>
+    <div class="kiln-body">
+      <div class="kiln-interior">
+        <div class="kiln-glow"></div>
+        <div class="kiln-elems kiln-elems-l">
+          <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+        </div>
+        <div class="kiln-elems kiln-elems-r">
+          <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+        </div>
+        <div class="kiln-slideshow" id="kiln-slideshow">
+          <img class="kiln-slide" src="website photos/highlights/20251219_113758.jpg" alt="Lee Pottery" loading="eager">
+          <img class="kiln-slide" src="website photos/highlights/20251219_122408.jpg" alt="Lee Pottery" loading="eager">
+          <img class="kiln-slide" src="website photos/highlights/20251219_123001.jpg" alt="Lee Pottery" loading="eager">
+          <img class="kiln-slide" src="website photos/highlights/20251219_124249.jpg" alt="Lee Pottery" loading="eager">
+          <img class="kiln-slide" src="website photos/highlights/20251219_125315.jpg" alt="Lee Pottery" loading="eager">
+          <img class="kiln-slide" src="website photos/highlights/20251219_132115.jpg" alt="Lee Pottery" loading="eager">
+          <img class="kiln-slide" src="website photos/highlights/20251219_133256.jpg" alt="Lee Pottery" loading="eager">
+          <img class="kiln-slide" src="website photos/highlights/20251219_134600.jpg" alt="Lee Pottery" loading="eager">
+          <img class="kiln-slide" src="website photos/highlights/20251219_134910.jpg" alt="Lee Pottery" loading="eager">
+          <img class="kiln-slide" src="website photos/highlights/20260131_133313.jpg" alt="Lee Pottery" loading="eager">
+          <img class="kiln-slide" src="website photos/highlights/20260131_133955.jpg" alt="Lee Pottery" loading="eager">
+          <img class="kiln-slide" src="website photos/highlights/20260131_135055.jpg" alt="Lee Pottery" loading="eager">
+          <img class="kiln-slide" src="website photos/highlights/20260201_135608.jpg" alt="Lee Pottery" loading="eager">
+        </div>
+      </div>
+      <div class="kiln-door-wrap" id="kiln-door">
+        <div class="kiln-door-back"></div>
+      </div>
+      <!-- Front face lives outside preserve-3d so JS opacity is reliable -->
+      <div class="kiln-door-front" id="kiln-door-front">
+        <div class="kdf-hinge kdf-hinge-t"></div>
+        <div class="kdf-hinge kdf-hinge-b"></div>
+        <div class="kdf-inner-frame"></div>
+        <div class="kdf-peep kdf-peep-t"></div>
+        <div class="kdf-peep kdf-peep-b"></div>
+        <div class="kdf-latch kdf-latch-t"><div class="kdf-latch-bar"></div></div>
+        <div class="kdf-latch kdf-latch-b"><div class="kdf-latch-bar"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Two-up magnetic cards (hidden — replaced by collage) -->
+  <div class="two-up" style="display:none">
+    <div class="mag-card reveal reveal-delay-1">
+      <div class="mag-card-inner" id="mc1">
+        <img src="https://leepottery.com.au/cdn/shop/files/20251219_122020_fdcb7dc8-a100-4afd-bb1d-8a41bced2873.jpg"
+             alt="Date Night Bowls" loading="lazy">
+        <div class="mag-card-overlay">
+          <span class="mag-card-label">Date Night Bowls — $149</span>
+        </div>
+      </div>
+    </div>
+    <div class="mag-card reveal reveal-delay-2">
+      <div class="mag-card-inner" id="mc2">
+        <img src="https://leepottery.com.au/cdn/shop/files/20251219_133256_d74cbf16-c4fe-4f94-9ea5-4d4cfff96af1.jpg"
+             alt="Imagine Vessel" loading="lazy">
+        <div class="mag-card-overlay">
+          <span class="mag-card-label">Imagine — $369</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shelf Gallery -->
+  <div class="shelf-section" id="shelf-section">
+    <div class="shelf-toggle-wrap">
+      <button class="shelf-nav-btn" id="shelf-prev" aria-label="Previous page">‹</button>
+      <button class="shelf-toggle-btn" id="shelf-toggle" aria-expanded="false">
+        <span>More work</span>
+        <span class="shelf-arrow">▾</span>
+      </button>
+      <button class="shelf-nav-btn" id="shelf-next" aria-label="Next page">›</button>
+    </div>
+    <div class="shelf-panel" id="shelf-panel">
+      <div class="shelf-wrap">
+        <div class="shelf-row" id="shelf-row-0">
+          <div class="shelf-item"><img src="" alt=""></div>
+          <div class="shelf-item"><img src="" alt=""></div>
+          <div class="shelf-item"><img src="" alt=""></div>
+          <div class="shelf-item"><img src="" alt=""></div>
+          <div class="shelf-item"><img src="" alt=""></div>
+        </div>
+        <div class="shelf-row" id="shelf-row-1">
+          <div class="shelf-item"><img src="" alt=""></div>
+          <div class="shelf-item"><img src="" alt=""></div>
+          <div class="shelf-item"><img src="" alt=""></div>
+          <div class="shelf-item"><img src="" alt=""></div>
+          <div class="shelf-item"><img src="" alt=""></div>
+        </div>
+        <div class="shelf-spacer"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cobalt interlude -->
+  <div class="interlude reveal">
+    <blockquote>
+      "My practice is constantly evolving as I explore new ideas, iterate, create, and then move on."
+      <cite>— Richard Lee, ceramicist</cite>
+    </blockquote>
+  </div>
+
+  <!-- Flip cards (hidden — replaced by collage) -->
+  <div class="flip-grid" style="display:none">
+    <!-- Flip 1: Snake Platter -->
+    <div class="flip-card reveal reveal-delay-1">
+      <div class="flip-inner">
+        <div class="flip-front">
+          <img src="https://leepottery.com.au/cdn/shop/files/20251219_121335_79e659d7-62c6-45da-abda-4e37e1962356.jpg"
+               alt="Snake Platter" loading="lazy">
+          <div class="flip-front-label">Snake Platter</div>
+        </div>
+        <div class="flip-back">
+          <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="60" cy="60" r="54" fill="none" stroke="#7B9BD4" stroke-width="1.5" opacity="0.3"/>
+            <path d="M 60 100 Q 28 84 32 58 Q 36 36 58 38 Q 78 40 76 22 Q 74 10 62 8"
+                  fill="none" stroke="#F2EFE8" stroke-width="6" stroke-linecap="round"/>
+            <ellipse cx="62" cy="8" rx="8" ry="6" fill="#F2EFE8"/>
+            <circle cx="66" cy="6" r="2" fill="#1A2B6B"/>
+            <path d="M 62 3 L 62 -4 M 62 -4 L 57 -9 M 62 -4 L 67 -9" stroke="#7B9BD4" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M 42 70 Q 48 66 51 72" fill="none" stroke="#7B9BD4" stroke-width="1.5" opacity="0.7"/>
+            <path d="M 50 52 Q 56 48 58 54" fill="none" stroke="#7B9BD4" stroke-width="1.5" opacity="0.7"/>
+          </svg>
+          <div class="flip-back-name">Snake Platter</div>
+          <div class="flip-back-desc">3D raised serpent, hand-painted cobalt on stoneware</div>
+          <div class="flip-back-price">$129</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Flip 2: Golden Crown -->
+    <div class="flip-card reveal reveal-delay-2">
+      <div class="flip-inner">
+        <div class="flip-front">
+          <img src="https://leepottery.com.au/cdn/shop/files/20251219_134731_8977c86b-e070-4785-b06b-7029932c176d.jpg"
+               alt="Golden Crown" loading="lazy">
+          <div class="flip-front-label">Golden Crown</div>
+        </div>
+        <div class="flip-back">
+          <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="60" cy="60" r="54" fill="none" stroke="#7B9BD4" stroke-width="1.5" opacity="0.3"/>
+            <!-- Crown vessel sketch -->
+            <path d="M 32 90 Q 28 60 34 38 Q 40 18 60 16 Q 80 18 86 38 Q 92 60 88 90 Z"
+                  fill="none" stroke="#F2EFE8" stroke-width="3" stroke-linejoin="round"/>
+            <path d="M 32 90 Q 60 96 88 90" fill="none" stroke="#F2EFE8" stroke-width="2.5" stroke-linecap="round"/>
+            <!-- Crown points at top -->
+            <path d="M 34 38 L 42 22 L 52 36 L 60 16 L 68 36 L 78 22 L 86 38"
+                  fill="none" stroke="#C4B89A" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+            <!-- Decorative line on vessel -->
+            <path d="M 34 65 Q 60 70 86 65" fill="none" stroke="#7B9BD4" stroke-width="1.5" opacity="0.6"/>
+            <path d="M 36 75 Q 60 80 84 75" fill="none" stroke="#7B9BD4" stroke-width="1" opacity="0.4"/>
+          </svg>
+          <div class="flip-back-name">Golden Crown</div>
+          <div class="flip-back-desc">Tall vessel with crown form, half-dipped cobalt glaze</div>
+          <div class="flip-back-price">$249</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Flip 3: Fruit Baskets -->
+    <div class="flip-card reveal reveal-delay-3">
+      <div class="flip-inner">
+        <div class="flip-front">
+          <img src="https://leepottery.com.au/cdn/shop/files/20251219_124249_e6d9d14f-8246-4faa-9e10-1085b6a97ae0.jpg"
+               alt="Fruit Baskets" loading="lazy">
+          <div class="flip-front-label">Fruit Baskets</div>
+        </div>
+        <div class="flip-back">
+          <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="60" cy="60" r="54" fill="none" stroke="#7B9BD4" stroke-width="1.5" opacity="0.3"/>
+            <!-- Woven basket sketch -->
+            <path d="M 22 75 Q 28 42 60 38 Q 92 42 98 75 Q 88 92 60 94 Q 32 92 22 75 Z"
+                  fill="none" stroke="#F2EFE8" stroke-width="3" stroke-linejoin="round"/>
+            <!-- Woven lines horizontal -->
+            <path d="M 26 58 Q 60 54 94 58" fill="none" stroke="#7B9BD4" stroke-width="1.3" opacity="0.55"/>
+            <path d="M 24 68 Q 60 64 96 68" fill="none" stroke="#7B9BD4" stroke-width="1.3" opacity="0.55"/>
+            <path d="M 26 79 Q 60 76 94 79" fill="none" stroke="#7B9BD4" stroke-width="1.3" opacity="0.55"/>
+            <!-- Woven lines vertical -->
+            <path d="M 38 40 Q 36 67 40 90" fill="none" stroke="#7B9BD4" stroke-width="1.3" opacity="0.45"/>
+            <path d="M 52 38 Q 50 67 52 92" fill="none" stroke="#7B9BD4" stroke-width="1.3" opacity="0.45"/>
+            <path d="M 68 38 Q 70 67 68 92" fill="none" stroke="#7B9BD4" stroke-width="1.3" opacity="0.45"/>
+            <path d="M 82 40 Q 84 67 80 90" fill="none" stroke="#7B9BD4" stroke-width="1.3" opacity="0.45"/>
+            <!-- Handle arc -->
+            <path d="M 30 50 Q 60 18 90 50" fill="none" stroke="#F2EFE8" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+          <div class="flip-back-name">Fruit Baskets</div>
+          <div class="flip-back-desc">Woven clay coils, fired whole — a signature form</div>
+          <div class="flip-back-price">from $99</div>
+        </div>
+      </div>
+    </div>
+  </div><!-- end flip-grid -->
+
+  <!-- Drag-scroll row (hidden — replaced by collage) -->
+  <div class="drag-row-wrap" id="drag-row-wrap" style="display:none">
+    <p class="drag-row-label reveal">← DRAG TO EXPLORE →</p>
+    <div class="drag-row-track" id="drag-track">
+
+      <div class="drag-item">
+        <img src="https://leepottery.com.au/cdn/shop/files/20251219_122020_fdcb7dc8-a100-4afd-bb1d-8a41bced2873.jpg" alt="Date Night Bowls" loading="lazy">
+        <div class="drag-item-label">Date Night Bowls — $149</div>
+      </div>
+      <div class="drag-item">
+        <img src="https://leepottery.com.au/cdn/shop/files/20251219_133256_d74cbf16-c4fe-4f94-9ea5-4d4cfff96af1.jpg" alt="Imagine" loading="lazy">
+        <div class="drag-item-label">Imagine — $369</div>
+      </div>
+      <div class="drag-item">
+        <img src="https://leepottery.com.au/cdn/shop/files/20251219_121335_79e659d7-62c6-45da-abda-4e37e1962356.jpg" alt="Snake Platter" loading="lazy">
+        <div class="drag-item-label">Snake Platter — $129</div>
+      </div>
+      <div class="drag-item">
+        <img src="https://leepottery.com.au/cdn/shop/files/20251219_134731_8977c86b-e070-4785-b06b-7029932c176d.jpg" alt="Golden Crown" loading="lazy">
+        <div class="drag-item-label">Golden Crown — $249</div>
+      </div>
+      <div class="drag-item">
+        <img src="https://leepottery.com.au/cdn/shop/files/20251219_124249_e6d9d14f-8246-4faa-9e10-1085b6a97ae0.jpg" alt="Fruit Baskets" loading="lazy">
+        <div class="drag-item-label">Fruit Baskets — from $99</div>
+      </div>
+      <div class="drag-item">
+        <img src="https://leepottery.com.au/cdn/shop/files/20251219_134910_1f14c020-316f-41b0-a435-99c9c95a49b0.jpg" alt="Swan Pots" loading="lazy">
+        <div class="drag-item-label">Swan Pots — from $199</div>
+      </div>
+      <div class="drag-item">
+        <img src="https://leepottery.com.au/cdn/shop/files/20251219_131248.jpg" alt="Collection" loading="lazy">
+        <div class="drag-item-label">Collection View</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Full-bleed 2 (hidden — replaced by collage) -->
+  <div class="full-bleed" id="fb2" style="display:none">
+    <div class="full-bleed-img">
+      <img src="https://leepottery.com.au/cdn/shop/files/20251219_131248.jpg"
+           alt="Illustrated platters — Lee Pottery" loading="lazy">
+    </div>
+    <div class="full-bleed-caption-bg"></div>
+    <div class="full-bleed-caption reveal">
+      <h3>Illustrated Platters</h3>
+      <p>Hand-painted before the kiln — each one unrepeatable</p>
+    </div>
+  </div>
+
+</section><!-- end gallery -->
+
+<!-- ─── ABOUT ─────────────────────────────────────────────────── -->
+<section id="about">
+
+  <!-- Top drip: white blob drips UP into stoneware above -->
+  <div class="about-blob-drip">
+    <svg viewBox="0 0 1440 110" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="
+        M 0,110 H 1440 V 90
+        C 1440,55   1400,30   1360,30
+        C 1322,30   1290,90   1280,90
+        C 1268,90   1232,45   1196,45
+        C 1164,45   1140,90   1130,90
+        C 1118,90   1083,20   1041,20
+        C 1001,20    966,90    956,90
+        C  946,90    920,60    887,60
+        C  857,60    826,90    816,90
+        C  804,90    769,35    730,35
+        C  691,35    657,90    646,90
+        C  636,90    599,50    559,50
+        C  514,50    470,90    458,90
+        C  447,90    408,15    367,15
+        C  321,15    271,90    258,90
+        C  247,90    215,55    181,55
+        C  147,55    114,90    104,90
+        C   96,90     73,40     47,40
+        C   25,40      7,90      0,90
+        Z
+      " fill="#FAF8F5"/>
+    </svg>
+  </div>
+
+  <!-- White blob content -->
+  <div class="about-glaze-blob">
+    <div class="about-image-wrap reveal">
+      <div class="about-img-inner">
+        <img src="website photos/about me.jpg"
+             alt="Richard Lee — ceramicist" loading="lazy">
+      </div>
+    </div>
+    <div class="about-text">
+      <p class="about-eyebrow reveal">The maker</p>
+      <h2 class="about-headline reveal reveal-delay-1">Richard<br>Lee</h2>
+      <div class="about-body reveal reveal-delay-2">
+        <p>I'm Richard Lee — originally from New Zealand, making in Sydney. My work explores organic themes through form, illustration, and surface design. All pieces are original and one of a kind.</p>
+        <p>The practice is constantly evolving: explore an idea, iterate, create, then move on. Nothing gets repeated indefinitely.</p>
+        <p>The illustrations are painted freehand before firing — swans, crabs, crocodiles, snakes. Animals that feel both ancient and immediate.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom drip: white blob drips DOWN into stoneware below -->
+  <div class="about-blob-drip">
+    <svg viewBox="0 0 1440 90" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="
+        M 0,0 H 1440 V 12
+        C 1440,45   1400,65   1360,65
+        C 1322,65   1290,12   1280,12
+        C 1268,12   1232,52   1196,52
+        C 1164,52   1140,12   1130,12
+        C 1118,12   1083,75   1041,75
+        C 1001,75    966,12    956,12
+        C  946,12    920,40    887,40
+        C  857,40    826,12    816,12
+        C  804,12    769,70    730,70
+        C  691,70    657,12    646,12
+        C  636,12    599,55    559,55
+        C  514,55    470,12    458,12
+        C  447,12    408,80    367,80
+        C  321,80    271,12    258,12
+        C  247,12    215,48    181,48
+        C  147,48    114,12    104,12
+        C   96,12     73,62     47,62
+        C   25,62      7,12      0,12
+        Z
+      " fill="#FAF8F5"/>
+    </svg>
+  </div>
+
+</section>
+
+<!-- ─── CONTACT ──────────────────────────────────────────────── -->
+<section id="contact">
+  <div class="contact-headline reveal">
+    MAKE<span class="slash"> / </span>IT<span class="slash"> / </span>YOURS
+  </div>
+  <p class="contact-sub reveal reveal-delay-1">tell me what you need</p>
+
+  <form action="https://formspree.io/f/YOUR_FORM_ID" method="POST" class="contact-grid reveal reveal-delay-2">
+    <input type="text"  name="name"    placeholder="your name"   required>
+    <input type="email" name="email"   placeholder="your email"  required>
+    <textarea class="full" name="message" placeholder="tell me about your commission — a gift, a set, a statement piece..." required></textarea>
+    <button type="submit" class="contact-submit full">Send Inquiry</button>
+  </form>
+</section>
+
+<!-- ─── FOOTER ───────────────────────────────────────────────── -->
+<footer>
+  <div class="footer-logo">Lee<span style="color:var(--clay)">.</span>Pottery</div>
+  <div class="footer-tagline">From my hands, to your home</div>
+  <div class="footer-copy">© 2025 Lee Pottery · leepottery.com.au</div>
+</footer>
+
+</div><!-- end main-site -->
+
+<!-- ─── JAVASCRIPT ───────────────────────────────────────────── -->
+<script>
+(function () {
+'use strict';
+
+/* ══════════════════════════════════════════════
+   1. CUSTOM CURSOR
+══════════════════════════════════════════════ */
+const cursorCanvas = document.getElementById('cursor-canvas');
+const ctx = cursorCanvas.getContext('2d');
+
+let cw = 0, ch = 0;
+function resizeCursor() {
+  cw = cursorCanvas.width  = window.innerWidth;
+  ch = cursorCanvas.height = window.innerHeight;
+}
+resizeCursor();
+window.addEventListener('resize', resizeCursor);
+
+const mouse    = { x: -300, y: -300 };
+const ring     = { x: -300, y: -300 };
+const TRAIL_LEN = 10;
+const trail    = Array.from({ length: TRAIL_LEN }, () => ({ x: -300, y: -300 }));
+
+document.addEventListener('mousemove', e => {
+  mouse.x = e.clientX;
+  mouse.y = e.clientY;
+});
+
+function lerp(a, b, t) { return a + (b - a) * t; }
+
+function drawCursor() {
+  ctx.clearRect(0, 0, cw, ch);
+
+  // Update ring with lag
+  ring.x = lerp(ring.x, mouse.x, 0.12);
+  ring.y = lerp(ring.y, mouse.y, 0.12);
+
+  // Update trail
+  for (let i = TRAIL_LEN - 1; i > 0; i--) {
+    trail[i].x = lerp(trail[i].x, trail[i - 1].x, 0.35);
+    trail[i].y = lerp(trail[i].y, trail[i - 1].y, 0.35);
+  }
+  trail[0].x = lerp(trail[0].x, mouse.x, 0.35);
+  trail[0].y = lerp(trail[0].y, mouse.y, 0.35);
+
+  // Draw trail droplets
+  for (let i = TRAIL_LEN - 1; i >= 0; i--) {
+    const t   = i / TRAIL_LEN;
+    const r   = 3.5 * (1 - t * 0.7);
+    const alpha = (1 - t) * 0.45;
+    ctx.beginPath();
+    ctx.arc(trail[i].x, trail[i].y, r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(43,63,140,${alpha})`;
+    ctx.fill();
+  }
+
+  // Draw outer ring
+  ctx.beginPath();
+  ctx.arc(ring.x, ring.y, 16, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(43,63,140,0.55)';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // Draw dot
+  ctx.beginPath();
+  ctx.arc(mouse.x, mouse.y, 4.5, 0, Math.PI * 2);
+  ctx.fillStyle = '#2B3F8C';
+  ctx.fill();
+
+  requestAnimationFrame(drawCursor);
+}
+drawCursor();
+
+
+/* ══════════════════════════════════════════════
+   2. INTRO SCREEN
+══════════════════════════════════════════════ */
+const intro     = document.getElementById('intro');
+const mainSite  = document.getElementById('main-site');
+const handLeft  = document.getElementById('hand-left');
+const handRight = document.getElementById('hand-right');
+const enterBtn  = document.getElementById('enter-btn');
+
+function updateHands(e) {
+  const wheelStage  = document.getElementById('wheel-stage');
+  const stageW      = wheelStage.offsetWidth;
+  const stageH      = wheelStage.offsetHeight;
+
+  const cx      = window.innerWidth / 2;
+  const dist    = Math.abs(e.clientX - cx);
+  const maxDist = window.innerWidth / 2;
+  const t       = 1 - Math.min(dist / maxDist, 1); // 0=far, 1=center
+
+  // Clay blob radius in viewport pixels
+  const clayRadiusPx = (56 / 400) * stageW;
+
+  // OPEN: hands well off-screen below-sides
+  const openLeft   = -70;
+  const openBottom = -(stageH * 0.55);
+
+  // CLOSED: fingertip geometry at rotate(6°) around transform-origin:bottom center
+  // SVG fingertip (index top) at ~(64, 32) in the 100×190 element.
+  // Pivot = (left+50, stageH − closedBottom). After 6° rotation:
+  //   fingertip_y ≈ pivotY − 156  → want ≈ stageH/2  → closedBottom ≈ stageH/2 − 156
+  //   fingertip_x ≈ left + 80     → want ≈ stageW/2 − clayR + 10px overlap
+  const closedLeft   = stageW / 2 - clayRadiusPx - 80;
+  const closedBottom = stageH / 2 - 156;
+
+  const posLeft   = openLeft   + t * (closedLeft   - openLeft);
+  const posBottom = openBottom + t * (closedBottom - openBottom);
+
+  handLeft.style.left   = posLeft   + 'px';
+  handRight.style.right = posLeft   + 'px';
+  handLeft.style.bottom = posBottom + 'px';
+  handRight.style.bottom = posBottom + 'px';
+
+  // Morph clay toward circular as hands touch (t→1)
+  const clayBlob  = document.getElementById('clay-blob');
+  const clayRing1 = document.getElementById('clay-ring1');
+  const clayRing2 = document.getElementById('clay-ring2');
+  if (clayBlob) {
+    clayBlob.setAttribute('ry',  (52 + t * 4).toFixed(2));   // 52→56
+    clayRing1.setAttribute('ry', (34 + t * 4).toFixed(2));   // 34→38
+    clayRing2.setAttribute('ry', (18 + t * 4).toFixed(2));   // 18→22
+  }
+}
+
+intro.addEventListener('mousemove', updateHands);
+
+enterBtn.addEventListener('click', () => {
+  intro.classList.add('hidden');
+  mainSite.style.opacity = '1';
+  document.body.style.overflow = 'visible';
+  triggerHeroAnimations();
+});
+
+// Also allow keyboard
+enterBtn.addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ' ') enterBtn.click();
+});
+
+
+/* ══════════════════════════════════════════════
+   3. HERO ANIMATIONS
+══════════════════════════════════════════════ */
+function triggerHeroAnimations() {
+  // Word slide-up
+  const words = document.querySelectorAll('.word-inner');
+  words.forEach((w, i) => {
+    setTimeout(() => w.classList.add('revealed'), i * 140);
+  });
+
+  // Typewriter
+  const tyEl  = document.getElementById('typewriter');
+  const tyStr = 'From my hands, to your home';
+  let tyIdx   = 0;
+  const tyDelay = 600;
+
+  setTimeout(() => {
+    const tyInt = setInterval(() => {
+      tyEl.textContent = tyStr.slice(0, ++tyIdx);
+      if (tyIdx >= tyStr.length) clearInterval(tyInt);
+    }, 55);
+  }, tyDelay);
+}
+
+
+/* ══════════════════════════════════════════════
+   4. SPECKLE CANVAS
+══════════════════════════════════════════════ */
+const speckleCanvas = document.getElementById('speckle-canvas');
+const sctx = speckleCanvas.getContext('2d');
+
+let sw = 0, sh = 0;
+function resizeSpeckle() {
+  const hero = document.getElementById('hero');
+  sw = speckleCanvas.width  = hero.offsetWidth;
+  sh = speckleCanvas.height = hero.offsetHeight;
+}
+
+const SPECKLE_COUNT = 80;
+const speckles = [];
+
+function initSpeckles() {
+  speckles.length = 0;
+  for (let i = 0; i < SPECKLE_COUNT; i++) {
+    speckles.push({
+      x:  Math.random() * sw,
+      y:  Math.random() * sh,
+      r:  1 + Math.random() * 2,
+      vx: (Math.random() - 0.5) * 0.3,
+      vy: (Math.random() - 0.5) * 0.3,
+      a:  0.08 + Math.random() * 0.18,
+    });
+  }
+}
+
+function drawSpeckles() {
+  sctx.clearRect(0, 0, sw, sh);
+  for (const s of speckles) {
+    s.x += s.vx;
+    s.y += s.vy;
+    if (s.x < 0) s.x = sw;
+    if (s.x > sw) s.x = 0;
+    if (s.y < 0) s.y = sh;
+    if (s.y > sh) s.y = 0;
+    sctx.beginPath();
+    sctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    sctx.fillStyle = `rgba(43,63,140,${s.a})`;
+    sctx.fill();
+  }
+  requestAnimationFrame(drawSpeckles);
+}
+
+function snapSwansToGlazeDrip() {
+  const drip = document.querySelector('.glaze-drip-wrap');
+  if (!drip) return;
+  const ph      = document.body.scrollHeight;
+  const dripTop = drip.getBoundingClientRect().top + window.scrollY;
+  const large   = creatureData.find(c => c.id === 'cr-swan-large');
+  const cygnet  = creatureData.find(c => c.id === 'cr-cygnet');
+  if (large)  large.worldY  = dripTop / ph;
+  if (cygnet) cygnet.worldY = dripTop / ph + 0.004;
+}
+
+window.addEventListener('load', () => {
+  resizeSpeckle();
+  initSpeckles();
+  drawSpeckles();
+  snapSwansToGlazeDrip();
+});
+window.addEventListener('resize', () => { resizeSpeckle(); initSpeckles(); snapSwansToGlazeDrip(); });
+
+
+/* ══════════════════════════════════════════════
+   5. SCROLL REVEAL (IntersectionObserver)
+══════════════════════════════════════════════ */
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      revealObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.12 });
+
+document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+
+/* ══════════════════════════════════════════════
+   6. PARALLAX (hero frame only — photos untouched)
+══════════════════════════════════════════════ */
+const heroFrame = document.getElementById('hero-frame');
+
+function onScroll() {
+  const sy = window.scrollY;
+
+  // Hero frame drift (frame drifts, image is not distorted)
+  if (heroFrame) {
+    heroFrame.style.transform = `rotate(-3deg) translateY(${sy * 0.08}px)`;
+  }
+
+  // Header scroll state
+  document.getElementById('site-header').classList.toggle('scrolled', sy > 60);
+}
+
+window.addEventListener('scroll', onScroll, { passive: true });
+
+
+/* ══════════════════════════════════════════════
+   6b. HERO IMAGE CYCLING
+══════════════════════════════════════════════ */
+(function () {
+  const heroImgs = [
+    'website photos/hero images/20251219_124249.jpg',
+    'website photos/hero images/20251219_131248.jpg',
+    'website photos/hero images/20251219_134910.jpg',
+    'website photos/hero images/20260131_133905.jpg',
+  ];
+
+  // Preload all images
+  heroImgs.forEach(src => { const i = new Image(); i.src = src; });
+
+  const imgEl  = document.getElementById('hero-img');
+  const shaker = document.getElementById('hero-img-shaker');
+  const DIP_MS = 600;   // must match CSS animation duration
+  const HOLD_MS = 5000; // time each image is fully visible
+
+  let idx = 2; // matches the initial 20251219_131248.jpg
+
+  function nextHeroImage() {
+    idx = (idx + 1) % heroImgs.length;
+    shaker.classList.add('dipping');
+    // swap at the bottom of the dip (50% through)
+    setTimeout(() => { imgEl.src = heroImgs[idx]; }, DIP_MS * 0.5);
+    shaker.addEventListener('animationend', () => {
+      shaker.classList.remove('dipping');
+    }, { once: true });
+  }
+
+  setInterval(nextHeroImage, HOLD_MS);
+})();
+
+
+/* ══════════════════════════════════════════════
+   7. CARD HOVER (overlay only — no photo distortion)
+══════════════════════════════════════════════ */
+// 3D tilt removed per feedback — photos shown clean.
+// Overlay label still fades in via CSS on .mag-card:hover
+
+
+/* ══════════════════════════════════════════════
+   8. DRAG-SCROLL ROW
+══════════════════════════════════════════════ */
+const dragWrap  = document.getElementById('drag-row-wrap');
+const dragTrack = document.getElementById('drag-track');
+
+if (dragWrap && dragTrack) {
+  let dragging   = false;
+  let startX     = 0;
+  let currentX   = 0;
+  let velX       = 0;
+  let lastX      = 0;
+  let raf        = null;
+
+  const maxScroll = () => -(dragTrack.scrollWidth - dragWrap.clientWidth - 80);
+
+  function clamp(val, min, max) { return Math.max(min, Math.min(max, val)); }
+
+  function setX(x) {
+    currentX = clamp(x, maxScroll(), 0);
+    dragTrack.style.transform = `translateX(${currentX}px)`;
+  }
+
+  function momentum() {
+    velX *= 0.93;
+    if (Math.abs(velX) < 0.3) return;
+    setX(currentX + velX);
+    raf = requestAnimationFrame(momentum);
+  }
+
+  dragWrap.addEventListener('pointerdown', e => {
+    if (raf) cancelAnimationFrame(raf);
+    dragging = true;
+    startX   = e.clientX - currentX;
+    lastX    = e.clientX;
+    velX     = 0;
+    dragTrack.style.transition = 'none';
+    dragWrap.setPointerCapture(e.pointerId);
+  });
+
+  dragWrap.addEventListener('pointermove', e => {
+    if (!dragging) return;
+    velX = e.clientX - lastX;
+    lastX = e.clientX;
+    setX(e.clientX - startX);
+  });
+
+  dragWrap.addEventListener('pointerup', () => {
+    if (!dragging) return;
+    dragging = false;
+    raf = requestAnimationFrame(momentum);
+  });
+
+  dragWrap.addEventListener('pointercancel', () => { dragging = false; });
+}
+
+
+/* ══════════════════════════════════════════════
+   9. KILN DOOR + SLIDESHOW
+══════════════════════════════════════════════ */
+(function() {
+  const door     = document.getElementById('kiln-door');
+  const scene    = document.getElementById('kiln-scene');
+  const interior = scene.querySelector('.kiln-interior');
+  const slides   = Array.from(document.querySelectorAll('.kiln-slide'));
+  const TRANSITION_MS = 900;
+  const HOLD_MS       = 3400;
+
+  let current = 0;
+  let timer   = null;
+  let isOpen  = false;
+  let busy    = false;
+
+  function crossfadeTo(nextIdx) {
+    if (busy || nextIdx === current) return;
+    busy = true;
+    const outgoing = slides[current];
+    const incoming = slides[nextIdx];
+    incoming.style.zIndex = '5';
+    incoming.classList.add('active');
+    setTimeout(() => {
+      outgoing.classList.remove('active');
+      outgoing.style.zIndex = '';
+      incoming.style.zIndex = '';
+      current = nextIdx;
+      busy    = false;
+    }, TRANSITION_MS + 50);
+  }
+
+  function openDoor() {
+    if (isOpen) return;
+    isOpen = true;
+    door.classList.add('open');
+    // CSS handles the front face fade via .kiln-door-wrap.open ~ .kiln-door-front
+    // Reveal interior after door is fully open (1.5s) + front face has faded (0.3s)
+    setTimeout(() => {
+      interior.style.opacity = '1';
+      slides[0].classList.add('active');
+      current = 0;
+      timer = setInterval(() => {
+        crossfadeTo((current + 1) % slides.length);
+      }, HOLD_MS);
+    }, 1500);
+  }
+
+  function closeDoor() {
+    if (!isOpen) return;
+    isOpen = false;
+    busy   = false;
+    interior.style.opacity = '0';
+    door.classList.remove('open'); // removing .open also cancels the CSS animation on front face
+    clearInterval(timer);
+    timer = null;
+    slides.forEach(s => { s.classList.remove('active'); s.style.zIndex = ''; });
+    current = 0;
+  }
+
+  if (scene && door) {
+    // Suppress the on-load fire — only open once the user has scrolled to the kiln
+    let ready = false;
+    setTimeout(() => { ready = true; }, 400);
+
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting && ready) openDoor();
+        if (!e.isIntersecting)        closeDoor();
+      });
+    }, { threshold: 0.5 });
+    obs.observe(scene);
+  }
+})();
+
+
+/* ══════════════════════════════════════════════
+   10. HAMBURGER NAV (MOBILE)
+══════════════════════════════════════════════ */
+const hamburger = document.getElementById('hamburger');
+const mainNav   = document.getElementById('main-nav');
+
+hamburger.addEventListener('click', () => {
+  const open = mainNav.classList.toggle('open');
+  hamburger.setAttribute('aria-expanded', open);
+});
+
+mainNav.querySelectorAll('a').forEach(a => {
+  a.addEventListener('click', () => mainNav.classList.remove('open'));
+});
+
+
+/* ══════════════════════════════════════════════
+   10. CREATURE SYSTEM
+══════════════════════════════════════════════ */
+const creatureData = [
+  {
+    id:       'cr-swan-large',
+    worldXBase: 0.72,   // base x as fraction of viewport
+    worldY:     0.28,   // world position as fraction of page height
+    behavior:   'glide',
+    speed:      0.4,
+    amplitude:  40,
+    period:     14000,
+    phaseX:     0,
+    phaseY:     1.5,
+    ox: 0, oy: 0,     // current autonomous offset
+    vfx: 0, vfy: 0,   // flee velocity
+    facing: 1,
+  },
+  {
+    id:       'cr-cygnet',
+    worldXBase: 0.62,
+    worldY:     0.31,
+    behavior:   'glide',
+    speed:      0.35,
+    amplitude:  28,
+    period:     12400,
+    phaseX:     2.1,
+    phaseY:     0.4,
+    ox: 0, oy: 0,
+    vfx: 0, vfy: 0,
+    facing: 1,
+  },
+  {
+    id:         'cr-croc',
+    worldXBase: 0.12,
+    worldY:     0.55,
+    behavior:   'croc',
+    state:      'hidden',
+    stateTimer: 0,
+    lurk:       5000 + Math.random() * 4000,
+    opacity:    0,
+    strikeOy:   -18,   // peak Y offset when fully up
+    ox: 0, oy: 120,    // start parked below
+    vfx: 0, vfy: 0,
+    facing: 1,
+  },
+  {
+    id:       'cr-crab',
+    worldXBase: 0.85,
+    worldY:     0.72,
+    behavior:   'crab',
+    state:      'pause',
+    stateTimer: 0,
+    pauseTime:  5000,
+    dartDist:   0,
+    dartDir:    1,
+    ox: 0, oy: 0,
+    vfx: 0, vfy: 0,
+    facing: 1,
+  },
+  {
+    id:       'cr-snake',
+    worldXBase: 0.08,
+    worldY:     0.85,
+    behavior:   'snake',
+    speed:      0.55,
+    amplitude:  25,
+    periodX:    11000,
+    periodY:    7000,
+    phaseX:     0,
+    phaseY:     0.8,
+    ox: 0, oy: 0,
+    vfx: 0, vfy: 0,
+    facing: 1,
+  },
+];
+
+// Attach DOM elements
+creatureData.forEach(c => {
+  c.el = document.getElementById(c.id);
+  // Set initial random phase offset so creatures don't sync
+  c.phaseOffset = Math.random() * Math.PI * 2;
+});
+
+let lastTime  = 0;
+let startTime = performance.now();
+
+function updateCreatures(timestamp) {
+  const now    = timestamp;
+  const t      = now - startTime;
+  const dt     = Math.min(now - lastTime, 50); // cap at 50ms
+  lastTime     = now;
+
+  const vw     = window.innerWidth;
+  const vh     = window.innerHeight;
+  const ph     = document.body.scrollHeight;
+  const sy     = window.scrollY;
+  const mx     = mouse.x;
+  const my     = mouse.y;
+  const FLEE_R = 160;
+  const FLEE_F = 3.5;
+
+  creatureData.forEach(c => {
+    if (!c.el) return;
+
+    // ── Autonomous movement ──
+    switch (c.behavior) {
+
+      case 'glide': {
+        // Sinusoidal glide
+        c.ox = Math.sin(t / c.period * Math.PI * 2 + c.phaseX) * (vw * 0.12);
+        c.oy = Math.sin(t / (c.period * 0.7) * Math.PI * 2 + c.phaseY) * c.amplitude;
+        break;
+      }
+
+      case 'snake': {
+        c.ox = Math.sin(t / c.periodX * Math.PI * 2 + c.phaseX) * (vw * 0.06);
+        c.oy = Math.sin(t / c.periodY * Math.PI * 2 + c.phaseY) * c.amplitude;
+        break;
+      }
+
+      case 'croc': {
+        c.stateTimer += dt;
+
+        if (c.state === 'hidden') {
+          // Invisible, parked below — wait for lurk timer then strike near mouse
+          c.opacity = 0;
+          c.oy      = 120;
+          if (c.stateTimer > c.lurk) {
+            // Snap X to near mouse position (with small random offset)
+            const targetOx = mx - c.worldXBase * vw + (Math.random() - 0.5) * 80;
+            c.ox         = Math.max(-vw * 0.35, Math.min(vw * 0.55, targetOx));
+            c.facing     = mx > c.worldXBase * vw ? 1 : -1;
+            c.state      = 'strike';
+            c.stateTimer = 0;
+          }
+
+        } else if (c.state === 'strike') {
+          // Fast fade-in + quick upward burst (~350ms)
+          const STRIKE_DUR = 350;
+          const p = Math.min(c.stateTimer / STRIKE_DUR, 1);
+          // Ease-out cubic for position
+          const ease = 1 - Math.pow(1 - p, 3);
+          c.oy      = 120 + (c.strikeOy - 120) * ease;
+          c.opacity = p;
+          if (p >= 1) {
+            c.state      = 'hold';
+            c.stateTimer = 0;
+          }
+
+        } else if (c.state === 'hold') {
+          // Stay fully visible for ~1 second
+          c.opacity = 0.82;
+          c.oy      = c.strikeOy;
+          if (c.stateTimer > 2000) {
+            c.state      = 'fade';
+            c.stateTimer = 0;
+          }
+
+        } else if (c.state === 'fade') {
+          // Slowly fade out + gently descend (~1800ms)
+          const FADE_DUR = 1800;
+          const p   = Math.min(c.stateTimer / FADE_DUR, 1);
+          c.opacity = 0.82 * (1 - p);
+          c.oy      = c.strikeOy + p * 40;
+          if (p >= 1) {
+            c.state      = 'hidden';
+            c.stateTimer = 0;
+            c.lurk       = 7000 + Math.random() * 6000;
+            c.oy         = 120;
+            c.opacity    = 0;
+          }
+        }
+        break;
+      }
+
+      case 'crab': {
+        c.stateTimer += dt;
+        if (c.state === 'pause') {
+          // Subtle breathing bob
+          c.oy = Math.sin(t / 1200) * 4;
+          if (c.stateTimer > c.pauseTime) {
+            c.state      = 'dart';
+            c.stateTimer = 0;
+            c.dartDir    = Math.random() > 0.5 ? 1 : -1;
+            c.dartDist   = 60 + Math.random() * 90;
+          }
+        } else if (c.state === 'dart') {
+          c.ox += c.dartDir * (dt * 0.175);
+          if (c.stateTimer > 840) {
+            c.state      = 'pause';
+            c.stateTimer = 0;
+            c.pauseTime  = 3600 + Math.random() * 4400;
+            // Keep crab roughly in bounds — allow leftward reach to ~40% from right
+            c.ox = Math.max(-vw * 0.45, Math.min(vw * 0.18, c.ox));
+          }
+        }
+        break;
+      }
+    }
+
+    // ── Flee logic ──
+    const baseVX  = c.worldXBase * vw + c.ox + (c.vfx || 0);
+    const baseVY  = c.worldY * ph - sy + c.oy + (c.vfy || 0);
+
+    const dx = baseVX - mx;
+    const dy = baseVY - my;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+
+    if (dist < FLEE_R && dist > 0 && c.behavior !== 'croc') {
+      const force = (FLEE_R - dist) / FLEE_R * FLEE_F;
+      c.vfx = (c.vfx || 0) + (dx / dist) * force * dt * 0.04;
+      c.vfy = (c.vfy || 0) + (dy / dist) * force * dt * 0.04;
+    }
+    // Decay flee velocity
+    c.vfx = (c.vfx || 0) * 0.92;
+    c.vfy = (c.vfy || 0) * 0.92;
+
+    // ── Position ──
+    const px = c.worldXBase * vw + c.ox + c.vfx;
+    const py = c.worldY * ph - sy   + c.oy + c.vfy;
+
+    // Flip horizontal based on horizontal velocity
+    const totalVx = c.vfx + (c.behavior === 'glide' || c.behavior === 'snake'
+      ? Math.cos(t / (c.period || c.periodX || 7000) * Math.PI * 2) * 0.5
+      : 0);
+    if (Math.abs(totalVx) > 0.2) c.facing = totalVx > 0 ? 1 : -1;
+
+    c.el.style.transform = `translate(${px}px, ${py}px) scaleX(${c.facing})`;
+
+    // Hide if well off screen; croc manages its own opacity
+    const inView = py > -200 && py < vh + 200;
+    c.el.style.opacity = c.behavior === 'croc'
+      ? c.opacity.toFixed(3)
+      : (inView ? '0.82' : '0');
+  });
+
+  requestAnimationFrame(updateCreatures);
+}
+
+// Start creature system after intro dismissed
+document.getElementById('enter-btn').addEventListener('click', () => {
+  lastTime = performance.now();
+  requestAnimationFrame(updateCreatures);
+});
+
+
+/* ══════════════════════════════════════════════
+   11. CONTACT HEADLINE STAGGER
+       (same word-slide-up treatment)
+══════════════════════════════════════════════ */
+// Contact headline reveals on scroll — handled by .reveal class
+
+})(); // end IIFE
+</script>
+
+<!-- Lightbox (outside gallery, outside IIFE) -->
+<div class="shelf-lightbox" id="shelf-lightbox" role="dialog" aria-modal="true">
+  <button class="shelf-lb-close" id="shelf-lb-close" aria-label="Close">✕</button>
+  <img class="shelf-lb-img" id="shelf-lb-img" src="" alt="">
+</div>
+
+<script>
+/* ── SHELF GALLERY ── */
+(function() {
+  const section  = document.getElementById('shelf-section');
+  const btn      = document.getElementById('shelf-toggle');
+  const panel    = document.getElementById('shelf-panel');
+  const prevBtn  = document.getElementById('shelf-prev');
+  const nextBtn  = document.getElementById('shelf-next');
+  const lb       = document.getElementById('shelf-lightbox');
+  const lbImg    = document.getElementById('shelf-lb-img');
+  const lbClose  = document.getElementById('shelf-lb-close');
+  const allImgs  = panel.querySelectorAll('.shelf-item img');
+  let isOpen = false;
+  let page   = 0;
+
+    /* Full photo pool */
+  const photos = [
+    'website photos/shelves/20251219_113234.jpg',
+    'website photos/shelves/20251219_113524.jpg',
+    'website photos/shelves/20251219_113758.jpg',
+    'website photos/shelves/20251219_114317.jpg',
+    'website photos/shelves/20251219_120024.jpg',
+    'website photos/shelves/20251219_120253.jpg',
+    'website photos/shelves/20251219_121335.jpg',
+    'website photos/shelves/20251219_121819.jpg',
+    'website photos/shelves/20251219_122020.jpg',
+    'website photos/shelves/20251219_122408.jpg',
+    'website photos/shelves/20251219_132354.jpg',
+    'website photos/shelves/20251219_133435.jpg',
+    'website photos/shelves/20251219_134454.jpg',
+    'website photos/shelves/20251219_134600.jpg',
+    'website photos/shelves/20251219_134731.jpg',
+    'website photos/shelves/20251219_134910.jpg',
+    'website photos/shelves/20260131_133313.jpg',
+    'website photos/shelves/20260131_133955.jpg',
+    'website photos/shelves/20260131_135055.jpg',
+    'website photos/shelves/20260201_135638.jpg',
+  ];
+
+  /* Shuffle photos into random order on each load */
+  for (let i = photos.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [photos[i], photos[j]] = [photos[j], photos[i]];
+  }
+
+  const PER_PAGE    = 10;
+  const totalPages  = Math.ceil(photos.length / PER_PAGE);
+
+  /* Populate shelf items for current page — only requests images for this page */
+  function renderPage(p) {
+    const start = p * PER_PAGE;
+    allImgs.forEach((img, i) => {
+      const src = photos[start + i];
+      img.src        = src || '';
+      img.alt        = src ? src.split('/').pop().replace('.jpg','') : '';
+      img.parentElement.style.visibility = src ? 'visible' : 'hidden';
+    });
+    prevBtn.disabled = p === 0;
+    nextBtn.disabled = p >= totalPages - 1;
+  }
+
+  /* Height-based open — no max-height lag */
+  function openPanel() {
+    renderPage(0);
+    panel.style.height = 'auto';
+    const h = panel.scrollHeight;
+    panel.style.height = '0px';
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      panel.style.height = h + 'px';
+    }));
+  }
+
+  function closePanel() {
+    panel.style.height = panel.scrollHeight + 'px';
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      panel.style.height = '0px';
+    }));
+  }
+
+  btn.addEventListener('click', () => {
+    isOpen = !isOpen;
+    btn.classList.toggle('open', isOpen);
+    btn.setAttribute('aria-expanded', isOpen);
+    section.classList.toggle('open', isOpen);
+    isOpen ? openPanel() : closePanel();
+  });
+
+  function goToPage(p) {
+    page = p;
+    /* Fade items out, swap, fade back */
+    allImgs.forEach(img => img.style.opacity = '0');
+    setTimeout(() => {
+      renderPage(p);
+      allImgs.forEach(img => { img.style.transition = 'opacity 0.3s ease'; img.style.opacity = '1'; });
+      /* Recalculate height after new images */
+      panel.style.height = 'auto';
+      const h = panel.scrollHeight;
+      panel.style.height = h + 'px';
+    }, 250);
+  }
+
+  prevBtn.addEventListener('click', () => { if (page > 0) goToPage(page - 1); });
+  nextBtn.addEventListener('click', () => { if (page < totalPages - 1) goToPage(page + 1); });
+
+  /* Lightbox */
+  panel.addEventListener('click', e => {
+    const item = e.target.closest('.shelf-item');
+    if (!item) return;
+    const img = item.querySelector('img');
+    if (!img || !img.src) return;
+    lbImg.src = img.src;
+    lbImg.alt = img.alt;
+    lb.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  });
+
+  function closeLightbox() {
+    lb.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  lbClose.addEventListener('click', closeLightbox);
+  lb.addEventListener('click', e => { if (e.target === lb) closeLightbox(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+})();
+</script>
+</body>
+</html>

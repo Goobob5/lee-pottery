@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+* { margin: 0; padding: 0; }
+body { background: #FAF8F5; }
+.hero-mock {
+  height: calc(100vh - 178px);
+  background: #FAF8F5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: sans-serif;
+  font-size: 2rem;
+  color: #2B3F8C;
+}
+.drip-wrap {
+  display: block;
+  line-height: 0;
+  background: #DFD0B8;
+}
+.drip-wrap svg { width: 100%; display: block; }
+.below {
+  height: 300px;
+  background-color: #DFD0B8;
+  background-image:
+    radial-gradient(circle, rgba(105,70,25,0.32) 1px, transparent 1px),
+    radial-gradient(circle, rgba(80,50,15,0.2) 1px, transparent 1px);
+  background-size: 38px 32px, 21px 18px;
+}
+</style>
+</head>
+<body>
+<div class="hero-mock">HERO SECTION</div>
+<div class="drip-wrap">
+  <svg viewBox="0 0 1440 178" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1440" height="178" fill="#DFD0B8"/>
+    <path d="
+      M 0,0 H 1440 V 45
+      L 1372,45 C 1372,65 1398,92 1398,120 C 1398,142 1322,142 1322,120 C 1322,92 1348,65 1348,45
+      L 1228,45 C 1228,62 1250,82 1250,105 C 1250,123 1186,123 1186,105 C 1186,82 1208,62 1208,45
+      L 1089,45 C 1089,70 1117,100 1117,142 C 1117,165 1033,165 1033,142 C 1033,100 1061,70 1061,45
+      L  927,45 C  927,60  946,78  946,100 C  946,118  890,118  890,100 C  890,78  909,60  909,45
+      L  781,45 C  781,68  808,98  808,135 C  808,156  728,156  728,135 C  728,98  755,68  755,45
+      L  629,45 C  629,65  653,90  653,118 C  653,138  583,138  583,118 C  583,90  607,65  607,45
+      L  463,45 C  463,75  493,108 493,150 C  493,172  403,172  403,150 C  403,108 433,75  433,45
+      L  287,45 C  287,62  308,82  308,108 C  308,126  248,126  248,108 C  248,82  269,62  269,45
+      L  120,45 C  120,65  144,92  144,126 C  144,148   72,148   72,126 C   72,92   96,65   96,45
+      L 0,45 Z
+    " fill="#FAF8F5"/>
+  </svg>
+</div>
+<div class="below"></div>
+</body>
+</html>
