@@ -133,6 +133,14 @@ button, input, textarea { cursor: none; font-family: inherit; }
   border: none;
   padding: 0;
   z-index: 3;
+  /* Expanded hit area to cover the full clay blob */
+  width: min(140px, 26vw);
+  height: min(140px, 26vw);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
   transition: opacity 0.2s, transform 0.2s;
 }
 #enter-btn:hover { opacity: 0.65; transform: translate(-50%, -50%) scale(1.1); }
@@ -902,42 +910,57 @@ nav a:hover::after { width: 100%; }
   align-items: flex-end;
   justify-content: center;
   gap: 12px;
-  padding-bottom: 14px;
+  padding-bottom: 22px;
 }
-/* Wooden shelf ledge */
-.shelf-row::after {
+/* Shelf 3D bottom face */
+.shelf-row::before {
   content: '';
   position: absolute;
   bottom: 0;
-  left: -20px; right: -20px;
-  height: 12px;
-  background: linear-gradient(180deg, #c8a060 0%, #b08840 55%, #8a6828 100%);
-  border-radius: 2px 2px 4px 4px;
-  box-shadow: 0 5px 14px rgba(0,0,0,0.28), 0 2px 4px rgba(0,0,0,0.18);
+  left: 4px; right: 4px;
+  height: 10px;
+  background: linear-gradient(180deg, #7a5010 0%, #5a3808 100%);
+  border-radius: 0 0 4px 4px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+  z-index: 0;
+}
+/* Wooden shelf ledge (top face) */
+.shelf-row::after {
+  content: '';
+  position: absolute;
+  bottom: 10px;
+  left: 4px; right: 4px;
+  height: 14px;
+  background: linear-gradient(180deg, #d8aa62 0%, #c09040 50%, #a07830 100%);
+  border-radius: 3px 3px 1px 1px;
+  box-shadow: 0 -1px 0 rgba(255,255,255,0.15) inset, 0 3px 10px rgba(0,0,0,0.22);
+  z-index: 1;
 }
 .shelf-item {
   position: relative;
   flex: 0 0 auto;
   cursor: none;
   transition: transform 0.22s ease;
+  z-index: 2;
 }
 .shelf-item:hover { transform: translateY(-7px); }
-/* Pot shadow on the shelf surface */
+/* Contact shadow on the shelf surface */
 .shelf-item::after {
   content: '';
   position: absolute;
-  bottom: -6px;
+  bottom: -4px;
   left: 50%; transform: translateX(-50%);
-  width: 70%; height: 8px;
-  background: radial-gradient(ellipse at center, rgba(0,0,0,0.22) 0%, transparent 70%);
+  width: 65%; height: 7px;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0.28) 0%, transparent 70%);
   border-radius: 50%;
+  z-index: 3;
 }
 .shelf-item img {
   display: block;
   width: auto;
   object-fit: contain;
   object-position: bottom center;
-  filter: drop-shadow(1px 6px 5px rgba(0,0,0,0.22));
+  filter: drop-shadow(5px 6px 10px rgba(0,0,0,0.38));
 }
 /* Staggered heights — feels like a real shelf of different-sized pots */
 .shelf-item:nth-child(1)  img { height: 168px; }
@@ -1937,16 +1960,199 @@ function updateHands(e) {
 
 intro.addEventListener('mousemove', updateHands);
 
-enterBtn.addEventListener('click', () => {
-  intro.classList.add('hidden');
+// Update hint text for touch devices (no cursor to move)
+if (window.matchMedia('(hover: none)').matches) {
+  const introLabel = document.getElementById('intro-label');
+  if (introLabel) introLabel.textContent = 'Tap the clay to enter';
+}
+
+let introEntered = false;
+
+function enterSite() {
+  if (introEntered) return;
+  introEntered = true;
+  enterBtn.style.pointerEvents = 'none';
+  const isTouch = window.matchMedia('(hover: none)').matches;
+  if (isTouch) {
+    animateHandsToCenter(playDonutTransition);
+  } else {
+    playDonutTransition();
+  }
+}
+
+// Mobile: animate hands from off-screen to closed position around clay
+function animateHandsToCenter(callback) {
+  const wheelStage = document.getElementById('wheel-stage');
+  const stageW = wheelStage.offsetWidth;
+  const stageH = wheelStage.offsetHeight;
+  const clayRadiusPx = (56 / 400) * stageW;
+  const closedLeft   = stageW / 2 - clayRadiusPx - 80;
+  const closedBottom = stageH / 2 - 156;
+
+  const t = 'left 0.45s ease-out, right 0.45s ease-out, bottom 0.45s ease-out';
+  handLeft.style.transition  = t;
+  handRight.style.transition = t;
+  handLeft.style.left    = closedLeft   + 'px';
+  handRight.style.right  = closedLeft   + 'px';
+  handLeft.style.bottom  = closedBottom + 'px';
+  handRight.style.bottom = closedBottom + 'px';
+
+  // Morph clay to circular as hands arrive
+  const clayBlob  = document.getElementById('clay-blob');
+  const clayRing1 = document.getElementById('clay-ring1');
+  const clayRing2 = document.getElementById('clay-ring2');
+  if (clayBlob) {
+    clayBlob.setAttribute('ry',  '56');
+    clayRing1.setAttribute('ry', '38');
+    clayRing2.setAttribute('ry', '22');
+  }
+
+  setTimeout(callback, 520);
+}
+
+// The full donut-zoom transition: hands drill in → clay opens → portal expands
+function playDonutTransition() {
+  // Reveal site behind intro immediately (it's hidden under the overlay)
+  mainSite.style.transition = 'none';
   mainSite.style.opacity = '1';
   document.body.style.overflow = 'visible';
-  triggerHeroAnimations();
-});
+  intro.style.transition = 'none'; // prevent any opacity fade interfering
 
+  const wheelStage = document.getElementById('wheel-stage');
+  const stageW = wheelStage.offsetWidth;
+  const stageH = wheelStage.offsetHeight;
+  const rect   = wheelStage.getBoundingClientRect();
+  const clayCX = rect.left + stageW / 2; // clay center in viewport px
+  const clayCY = rect.top  + stageH / 2;
+
+  // Phase 1 (0–200ms): hands drill in — thumbs meet at clay centre.
+  // Left thumb is at element-space x≈101; right at ≈74 from its right edge.
+  // deepLeft = stageW/2 - 80 puts both thumbs within ~20px of centre.
+  const deepLeft   = stageW / 2 - 80;
+  const deepBottom = stageH / 2 - 120;
+  const drillT = 'left 0.18s ease-in, right 0.18s ease-in, bottom 0.18s ease-in';
+  handLeft.style.transition  = drillT;
+  handRight.style.transition = drillT;
+  handLeft.style.left    = deepLeft   + 'px';
+  handRight.style.right  = deepLeft   + 'px';
+  handLeft.style.bottom  = deepBottom + 'px';
+  handRight.style.bottom = deepBottom + 'px';
+
+  // Phase 2 (180ms): grow a hole through the clay using SVG mask
+  setTimeout(() => {
+    const svg = document.getElementById('wheel-svg');
+
+    // Build SVG defs + mask
+    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    const mask = document.createElementNS('http://www.w3.org/2000/svg', 'mask');
+    mask.setAttribute('id', 'clay-donut-mask');
+    const whiteRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    whiteRect.setAttribute('width', '400'); whiteRect.setAttribute('height', '400');
+    whiteRect.setAttribute('fill', 'white');
+    const holeCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    holeCircle.setAttribute('cx', '200'); holeCircle.setAttribute('cy', '200');
+    holeCircle.setAttribute('r', '0');   holeCircle.setAttribute('fill', 'black');
+    mask.appendChild(whiteRect); mask.appendChild(holeCircle);
+    defs.appendChild(mask);
+    svg.insertBefore(defs, svg.firstChild);
+
+    // Group clay elements and apply the mask (only clay gets the hole, not the wheel)
+    const clayGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    clayGroup.setAttribute('mask', 'url(#clay-donut-mask)');
+    const clayBlob  = document.getElementById('clay-blob');
+    const clayRing1 = document.getElementById('clay-ring1');
+    const clayRing2 = document.getElementById('clay-ring2');
+    const centerDot = svg.querySelector('circle[r="5"]');
+    svg.appendChild(clayGroup);
+    [clayBlob, clayRing1, clayRing2, centerDot].forEach(el => { if (el) clayGroup.appendChild(el); });
+
+    // Animate hole: 0 → 62 SVG units over 580ms (ease in-out)
+    let h0 = null;
+    const hDur = 580, maxHR = 62;
+    function animHole(ts) {
+      if (!h0) h0 = ts;
+      const p = Math.min((ts - h0) / hDur, 1);
+      const e = p < 0.5 ? 2*p*p : -1 + (4 - 2*p)*p;
+      holeCircle.setAttribute('r', (e * maxHR).toFixed(2));
+      if (p < 1) requestAnimationFrame(animHole);
+    }
+    requestAnimationFrame(animHole);
+
+    // Phase 3 (420ms after phase 2): expand portal to fill viewport
+    setTimeout(() => {
+      // Hands spread apart as the portal opens wide
+      const spreadT = 'left 0.65s ease-out, right 0.65s ease-out, bottom 0.65s ease-out';
+      handLeft.style.transition  = spreadT;
+      handRight.style.transition = spreadT;
+      handLeft.style.left    = '-90px';
+      handRight.style.right  = '-90px';
+      handLeft.style.bottom  = -(stageH * 0.7) + 'px';
+      handRight.style.bottom = -(stageH * 0.7) + 'px';
+
+      // Clay tunnel ring — a div inside #intro that renders a clay-coloured band
+      // at the portal's leading edge. Since #intro's CSS mask makes everything
+      // inside radius R transparent, and this div sits inside #intro, the clay
+      // ring is only visible in the opaque region (R to R+bandW), creating the
+      // illusion that we are zooming through a clay tunnel.
+      const clayRingEl = document.createElement('div');
+      clayRingEl.style.cssText = 'position:absolute;inset:0;pointer-events:none;z-index:4;';
+      intro.appendChild(clayRingEl);
+
+      // CSS mask punches an expanding circular hole in the intro overlay,
+      // centred on the clay, zooming the viewer through into the site.
+      const maxR = Math.hypot(
+        Math.max(clayCX, window.innerWidth  - clayCX),
+        Math.max(clayCY, window.innerHeight - clayCY)
+      );
+      let z0 = null;
+      const zDur = 850;
+      function animZoom(ts) {
+        if (!z0) z0 = ts;
+        const p = Math.min((ts - z0) / zDur, 1);
+        const e = p * p * (3 - 2 * p); // smoothstep
+        const r = e * maxR;
+        const feather = Math.max(3, r * 0.025); // soft portal edge
+
+        // Intro mask: transparent inside portal, opaque outside
+        const mg = `radial-gradient(circle at ${clayCX}px ${clayCY}px, transparent 0px, transparent ${r}px, black ${r + feather}px, black 100%)`;
+        intro.style.webkitMaskImage = mg;
+        intro.style.maskImage = mg;
+
+        // Clay tunnel ring — band width grows proportionally with r to simulate
+        // perspective: the deeper we zoom, the thicker the clay walls appear.
+        const bandW = Math.max(12, r * 0.18);
+        const rInner = r;
+        const rOuter = r + bandW;
+        // Gradient: transparent inside portal → dark clay edge → mid clay → lighter clay → fade out
+        const cg = `radial-gradient(circle at ${clayCX}px ${clayCY}px,
+          transparent 0px,
+          transparent ${rInner}px,
+          #b8a882 ${rInner + feather}px,
+          #d4c9b0 ${rInner + bandW * 0.30}px,
+          #c8bc9e ${rInner + bandW * 0.60}px,
+          #d4c9b0 ${rOuter - bandW * 0.15}px,
+          transparent ${rOuter}px
+        )`;
+        clayRingEl.style.background = cg;
+
+        if (p < 1) {
+          requestAnimationFrame(animZoom);
+        } else {
+          intro.style.display = 'none';
+          triggerHeroAnimations();
+        }
+      }
+      requestAnimationFrame(animZoom);
+
+    }, 420);
+
+  }, 180);
+}
+
+enterBtn.addEventListener('click', enterSite);
 // Also allow keyboard
 enterBtn.addEventListener('keydown', e => {
-  if (e.key === 'Enter' || e.key === ' ') enterBtn.click();
+  if (e.key === 'Enter' || e.key === ' ') enterSite();
 });
 
 
@@ -2547,26 +2753,26 @@ document.getElementById('enter-btn').addEventListener('click', () => {
 
     /* Full photo pool */
   const photos = [
-    'website photos/shelves/20251219_113234.jpg',
-    'website photos/shelves/20251219_113524.jpg',
-    'website photos/shelves/20251219_113758.jpg',
-    'website photos/shelves/20251219_114317.jpg',
-    'website photos/shelves/20251219_120024.jpg',
-    'website photos/shelves/20251219_120253.jpg',
-    'website photos/shelves/20251219_121335.jpg',
-    'website photos/shelves/20251219_121819.jpg',
-    'website photos/shelves/20251219_122020.jpg',
-    'website photos/shelves/20251219_122408.jpg',
-    'website photos/shelves/20251219_132354.jpg',
-    'website photos/shelves/20251219_133435.jpg',
-    'website photos/shelves/20251219_134454.jpg',
-    'website photos/shelves/20251219_134600.jpg',
-    'website photos/shelves/20251219_134731.jpg',
-    'website photos/shelves/20251219_134910.jpg',
-    'website photos/shelves/20260131_133313.jpg',
-    'website photos/shelves/20260131_133955.jpg',
-    'website photos/shelves/20260131_135055.jpg',
-    'website photos/shelves/20260201_135638.jpg',
+    'website photos/shelves/nobg/20251219_113234.png',
+    'website photos/shelves/nobg/20251219_113524.png',
+    'website photos/shelves/nobg/20251219_113758.png',
+    'website photos/shelves/nobg/20251219_114317.png',
+    'website photos/shelves/nobg/20251219_120024.png',
+    'website photos/shelves/nobg/20251219_120253.png',
+    'website photos/shelves/nobg/20251219_121335.png',
+    'website photos/shelves/nobg/20251219_121819.png',
+    'website photos/shelves/nobg/20251219_122020.png',
+    'website photos/shelves/nobg/20251219_122408.png',
+    'website photos/shelves/nobg/20251219_132354.png',
+    'website photos/shelves/nobg/20251219_133435.png',
+    'website photos/shelves/nobg/20251219_134454.png',
+    'website photos/shelves/nobg/20251219_134600.png',
+    'website photos/shelves/nobg/20251219_134731.png',
+    'website photos/shelves/nobg/20251219_134910.png',
+    'website photos/shelves/nobg/20260131_133313.png',
+    'website photos/shelves/nobg/20260131_133955.png',
+    'website photos/shelves/nobg/20260131_135055.png',
+    'website photos/shelves/nobg/20260201_135638.png',
   ];
 
   /* Shuffle photos into random order on each load */
