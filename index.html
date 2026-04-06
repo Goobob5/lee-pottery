@@ -29,6 +29,38 @@ body {
   cursor: none;
   overflow-x: hidden;
 }
+/* ─── WIDE-SCREEN CONTENT CAPPING ──────────────────────────────
+   Backgrounds bleed full-width; content stays within ~1440px.
+   Formula: max(base, calc(50% - 720px + base)) — invisible below 1440px,
+   then grows proportionally so elements don't drift on ultra-wide screens. */
+#site-header {
+  padding-left:  max(48px, calc(50% - 720px + 48px));
+  padding-right: max(48px, calc(50% - 720px + 48px));
+}
+#hero {
+  padding-left:  max(0px, calc(50% - 720px));
+  padding-right: max(0px, calc(50% - 720px));
+}
+.about-glaze-blob {
+  padding-left:  max(0px, calc(50% - 720px));
+  padding-right: max(0px, calc(50% - 720px));
+}
+.two-up {
+  padding-left:  max(80px, calc(50% - 720px + 80px));
+  padding-right: max(80px, calc(50% - 720px + 80px));
+}
+.interlude {
+  padding-left:  max(160px, calc(50% - 720px + 160px));
+  padding-right: max(160px, calc(50% - 720px + 160px));
+}
+#contact {
+  padding-left:  max(80px, calc(50% - 720px + 80px));
+  padding-right: max(80px, calc(50% - 720px + 80px));
+}
+footer {
+  padding-left:  max(80px, calc(50% - 720px + 80px));
+  padding-right: max(80px, calc(50% - 720px + 80px));
+}
 a { color: inherit; text-decoration: none; cursor: none; }
 img { display: block; width: 100%; height: 100%; object-fit: cover; }
 button, input, textarea { cursor: none; font-family: inherit; }
@@ -854,54 +886,27 @@ nav a:hover::after { width: 100%; }
   width: 38px; height: 38px;
   display: flex; align-items: center; justify-content: center;
   cursor: none;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s ease, background 0.2s ease, color 0.2s ease;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 .shelf-nav-btn:hover { background: var(--cobalt); color: var(--white); }
 .shelf-nav-btn:disabled { opacity: 0.25 !important; pointer-events: none; }
-.shelf-section.open .shelf-nav-btn { opacity: 1; pointer-events: all; }
 .shelf-page-info {
   font-family: 'IM Fell English', serif;
   font-style: italic;
   font-size: 0.8rem;
   color: var(--cobalt);
-  opacity: 0;
-  transition: opacity 0.3s ease;
+  opacity: 0.7;
   min-width: 44px;
   text-align: center;
 }
-.shelf-section.open .shelf-page-info { opacity: 0.7; }
-.shelf-toggle-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 1rem;
-  letter-spacing: 0.16em;
-  color: var(--cobalt);
-  background: none;
-  border: 1.5px solid var(--cobalt);
-  padding: 11px 28px;
-  cursor: none;
-  transition: background 0.2s ease, color 0.2s ease;
-}
-.shelf-toggle-btn:hover { background: var(--cobalt); color: var(--white); }
-.shelf-arrow {
-  display: inline-block;
-  transition: transform 0.35s ease;
-  font-size: 0.75rem;
-}
-.shelf-toggle-btn.open .shelf-arrow { transform: rotate(180deg); }
 .shelf-panel {
-  overflow: hidden;
-  height: 0;
-  transition: height 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: visible;
 }
 .shelf-wrap {
   padding: 20px 48px 0;
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 40px;
 }
 .shelf-row {
@@ -910,7 +915,7 @@ nav a:hover::after { width: 100%; }
   align-items: flex-end;
   justify-content: center;
   gap: 12px;
-  padding-bottom: 22px;
+  padding-bottom: 26px;
 }
 /* Shelf 3D bottom face */
 .shelf-row::before {
@@ -948,10 +953,10 @@ nav a:hover::after { width: 100%; }
 .shelf-item::after {
   content: '';
   position: absolute;
-  bottom: -4px;
+  bottom: -2px;
   left: 50%; transform: translateX(-50%);
-  width: 65%; height: 7px;
-  background: radial-gradient(ellipse at center, rgba(0,0,0,0.28) 0%, transparent 70%);
+  width: 70%; height: 8px;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0.35) 0%, transparent 70%);
   border-radius: 50%;
   z-index: 3;
 }
@@ -1548,10 +1553,7 @@ footer {
   <div class="shelf-section" id="shelf-section">
     <div class="shelf-toggle-wrap">
       <button class="shelf-nav-btn" id="shelf-prev" aria-label="Previous page">‹</button>
-      <button class="shelf-toggle-btn" id="shelf-toggle" aria-expanded="false">
-        <span>More work</span>
-        <span class="shelf-arrow">▾</span>
-      </button>
+      <span class="shelf-page-info" id="shelf-page-info"></span>
       <button class="shelf-nav-btn" id="shelf-next" aria-label="Next page">›</button>
     </div>
     <div class="shelf-panel" id="shelf-panel">
@@ -2739,19 +2741,17 @@ document.getElementById('enter-btn').addEventListener('click', () => {
 <script>
 /* ── SHELF GALLERY ── */
 (function() {
-  const section  = document.getElementById('shelf-section');
-  const btn      = document.getElementById('shelf-toggle');
   const panel    = document.getElementById('shelf-panel');
   const prevBtn  = document.getElementById('shelf-prev');
   const nextBtn  = document.getElementById('shelf-next');
+  const pageInfo = document.getElementById('shelf-page-info');
   const lb       = document.getElementById('shelf-lightbox');
   const lbImg    = document.getElementById('shelf-lb-img');
   const lbClose  = document.getElementById('shelf-lb-close');
   const allImgs  = panel.querySelectorAll('.shelf-item img');
-  let isOpen = false;
-  let page   = 0;
+  let page = 0;
 
-    /* Full photo pool */
+  /* Full photo pool — nobg PNGs for shelf display */
   const photos = [
     'website photos/shelves/nobg/20251219_113234.png',
     'website photos/shelves/nobg/20251219_113524.png',
@@ -2781,72 +2781,54 @@ document.getElementById('enter-btn').addEventListener('click', () => {
     [photos[i], photos[j]] = [photos[j], photos[i]];
   }
 
-  const PER_PAGE    = 10;
-  const totalPages  = Math.ceil(photos.length / PER_PAGE);
+  const PER_PAGE   = 10;
+  const totalPages = Math.ceil(photos.length / PER_PAGE);
 
-  /* Populate shelf items for current page — only requests images for this page */
+  /* Derive original JPG path from nobg PNG */
+  function origSrc(png) {
+    return png.replace('nobg/', '').replace('.png', '.jpg');
+  }
+
+  function updatePageInfo() {
+    pageInfo.textContent = totalPages > 1 ? `${page + 1} / ${totalPages}` : '';
+  }
+
+  /* Populate shelf items for current page */
   function renderPage(p) {
     const start = p * PER_PAGE;
     allImgs.forEach((img, i) => {
       const src = photos[start + i];
       img.src        = src || '';
-      img.alt        = src ? src.split('/').pop().replace('.jpg','') : '';
+      img.alt        = src ? src.split('/').pop().replace('.png','') : '';
       img.parentElement.style.visibility = src ? 'visible' : 'hidden';
     });
     prevBtn.disabled = p === 0;
     nextBtn.disabled = p >= totalPages - 1;
+    updatePageInfo();
   }
-
-  /* Height-based open — no max-height lag */
-  function openPanel() {
-    renderPage(0);
-    panel.style.height = 'auto';
-    const h = panel.scrollHeight;
-    panel.style.height = '0px';
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      panel.style.height = h + 'px';
-    }));
-  }
-
-  function closePanel() {
-    panel.style.height = panel.scrollHeight + 'px';
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      panel.style.height = '0px';
-    }));
-  }
-
-  btn.addEventListener('click', () => {
-    isOpen = !isOpen;
-    btn.classList.toggle('open', isOpen);
-    btn.setAttribute('aria-expanded', isOpen);
-    section.classList.toggle('open', isOpen);
-    isOpen ? openPanel() : closePanel();
-  });
 
   function goToPage(p) {
     page = p;
-    /* Fade items out, swap, fade back */
     allImgs.forEach(img => img.style.opacity = '0');
     setTimeout(() => {
       renderPage(p);
       allImgs.forEach(img => { img.style.transition = 'opacity 0.3s ease'; img.style.opacity = '1'; });
-      /* Recalculate height after new images */
-      panel.style.height = 'auto';
-      const h = panel.scrollHeight;
-      panel.style.height = h + 'px';
     }, 250);
   }
+
+  /* Render immediately on load */
+  renderPage(0);
 
   prevBtn.addEventListener('click', () => { if (page > 0) goToPage(page - 1); });
   nextBtn.addEventListener('click', () => { if (page < totalPages - 1) goToPage(page + 1); });
 
-  /* Lightbox */
+  /* Lightbox — show original JPG with white background */
   panel.addEventListener('click', e => {
     const item = e.target.closest('.shelf-item');
     if (!item) return;
     const img = item.querySelector('img');
     if (!img || !img.src) return;
-    lbImg.src = img.src;
+    lbImg.src = origSrc(img.src);
     lbImg.alt = img.alt;
     lb.classList.add('active');
     document.body.style.overflow = 'hidden';
