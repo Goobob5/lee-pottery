@@ -704,7 +704,7 @@ nav a:hover::after { width: 100%; }
   box-shadow: inset 0 0 50px rgba(0,0,0,0.45);
   overflow: hidden;
   opacity: 0;
-  transition: opacity 0.5s ease;
+  transition: opacity 0.2s ease;
 }
 .kiln-glow {
   position: absolute;
@@ -781,15 +781,10 @@ nav a:hover::after { width: 100%; }
   border-radius: 10px 10px 5px 5px;
   border: 2px solid #6a7e8e;
   box-shadow: inset 0 1px 0 rgba(200,220,240,0.1), inset 0 -1px 0 rgba(0,0,0,0.2);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
-/* When the door wrapper gets .open, fade the front face away after rotation completes.
-   Pure CSS sibling selector — no JS opacity needed, no preserve-3d interference. */
-@keyframes kiln-front-hide {
-  to { opacity: 0; pointer-events: none; }
-}
-.kiln-door-wrap.open ~ .kiln-door-front {
-  animation: kiln-front-hide 0.3s ease 1.5s forwards;
-}
+/* Front face is inside the preserve-3d wrapper; backface-visibility hides it naturally past 90deg */
 .kdf-inner-frame {
   position: absolute;
   inset: 16px;
@@ -967,12 +962,7 @@ nav a:hover::after { width: 100%; }
   object-position: bottom center;
   filter: drop-shadow(5px 6px 10px rgba(0,0,0,0.38));
 }
-/* Staggered heights — feels like a real shelf of different-sized pots */
-.shelf-item:nth-child(1)  img { height: 168px; }
-.shelf-item:nth-child(2)  img { height: 200px; }
-.shelf-item:nth-child(3)  img { height: 155px; }
-.shelf-item:nth-child(4)  img { height: 185px; }
-.shelf-item:nth-child(5)  img { height: 210px; }
+/* Heights set per-item by JS based on real-world scale */
 .shelf-spacer { padding-bottom: 36px; }
 /* Lightbox */
 .shelf-lightbox {
@@ -1512,17 +1502,17 @@ footer {
         </div>
       </div>
       <div class="kiln-door-wrap" id="kiln-door">
+        <!-- Front face is a child of preserve-3d wrapper; backface-visibility hides it past 90deg -->
+        <div class="kiln-door-front" id="kiln-door-front">
+          <div class="kdf-hinge kdf-hinge-t"></div>
+          <div class="kdf-hinge kdf-hinge-b"></div>
+          <div class="kdf-inner-frame"></div>
+          <div class="kdf-peep kdf-peep-t"></div>
+          <div class="kdf-peep kdf-peep-b"></div>
+          <div class="kdf-latch kdf-latch-t"><div class="kdf-latch-bar"></div></div>
+          <div class="kdf-latch kdf-latch-b"><div class="kdf-latch-bar"></div></div>
+        </div>
         <div class="kiln-door-back"></div>
-      </div>
-      <!-- Front face lives outside preserve-3d so JS opacity is reliable -->
-      <div class="kiln-door-front" id="kiln-door-front">
-        <div class="kdf-hinge kdf-hinge-t"></div>
-        <div class="kdf-hinge kdf-hinge-b"></div>
-        <div class="kdf-inner-frame"></div>
-        <div class="kdf-peep kdf-peep-t"></div>
-        <div class="kdf-peep kdf-peep-b"></div>
-        <div class="kdf-latch kdf-latch-t"><div class="kdf-latch-bar"></div></div>
-        <div class="kdf-latch kdf-latch-b"><div class="kdf-latch-bar"></div></div>
       </div>
     </div>
   </div>
@@ -2420,8 +2410,8 @@ if (dragWrap && dragTrack) {
     if (isOpen) return;
     isOpen = true;
     door.classList.add('open');
-    // CSS handles the front face fade via .kiln-door-wrap.open ~ .kiln-door-front
-    // Reveal interior after door is fully open (1.5s) + front face has faded (0.3s)
+    // Front face vanishes at ~90deg (~750ms). Start interior reveal then so it's
+    // fully faded in by the time the door reaches its final position at 1500ms.
     setTimeout(() => {
       interior.style.opacity = '1';
       slides[0].classList.add('active');
@@ -2429,7 +2419,7 @@ if (dragWrap && dragTrack) {
       timer = setInterval(() => {
         crossfadeTo((current + 1) % slides.length);
       }, HOLD_MS);
-    }, 1500);
+    }, 20);
   }
 
   function closeDoor() {
@@ -2751,6 +2741,30 @@ document.getElementById('enter-btn').addEventListener('click', () => {
   const allImgs  = panel.querySelectorAll('.shelf-item img');
   let page = 0;
 
+  /* Per-item display heights in px — derived from real-world scale ratios */
+  const itemHeights = {
+    '20260201_135638': 43,
+    '20251219_121819': 47,
+    '20251219_122020': 42,
+    '20260131_133313': 61,
+    '20260131_133955': 81,
+    '20260131_135055': 84,
+    '20251219_121335': 65,
+    '20251219_114317': 88,
+    '20251219_120024': 104,
+    '20251219_113234': 59,
+    '20251219_113524': 52,
+    '20251219_113758': 52,
+    '20251219_120253': 84,
+    '20251219_134910': 163,
+    '20251219_122408': 114,
+    '20251219_134454': 108,
+    '20251219_134600': 124,
+    '20251219_134731': 110,
+    '20251219_132354': 183,
+    '20251219_133435': 220,
+  };
+
   /* Full photo pool — nobg PNGs for shelf display */
   const photos = [
     'website photos/shelves/nobg/20251219_113234.png',
@@ -2801,6 +2815,10 @@ document.getElementById('enter-btn').addEventListener('click', () => {
       img.src        = src || '';
       img.alt        = src ? src.split('/').pop().replace('.png','') : '';
       img.parentElement.style.visibility = src ? 'visible' : 'hidden';
+      if (src) {
+        const stem = src.split('/').pop().replace('.png','');
+        img.style.height = (itemHeights[stem] || 120) + 'px';
+      }
     });
     prevBtn.disabled = p === 0;
     nextBtn.disabled = p >= totalPages - 1;
