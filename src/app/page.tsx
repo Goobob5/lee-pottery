@@ -40,7 +40,6 @@ export default function Home() {
     <div data-screen-label="Home">
       {/* Intro banner — recreates the market table banner */}
       <section className={styles.hero}>
-        <Image src="/images/brand/crocodile-single.png" alt="" width={390} height={164} className={styles.heroAnimal} />
         <div className={styles.heroInner}>
           <div className={styles.portraitWrap}>
             <div className={styles.portraitGlow} />
@@ -66,6 +65,7 @@ export default function Home() {
               <Link href="/artist" className={styles.textLink}>More about the artist</Link>
             </div>
           </div>
+          <Image src="/images/brand/crocodile-single.png" alt="" width={390} height={164} className={styles.heroAnimal} />
         </div>
       </section>
 
