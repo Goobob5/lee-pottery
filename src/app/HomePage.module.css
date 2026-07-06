@@ -17,6 +17,7 @@
   right: -30px;
   bottom: -24px;
   width: 150px;
+  height: auto;
   opacity: 0.85;
   pointer-events: none;
 }
@@ -386,10 +387,6 @@
   display: flex;
   align-items: center;
   gap: 20px;
-}
-.galleristCrab {
-  height: 64px;
-  opacity: 0.9;
 }
 .galleristText {
   margin: 0;

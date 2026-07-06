@@ -40,7 +40,7 @@ export default function Home() {
     <div data-screen-label="Home">
       {/* Intro banner — recreates the market table banner */}
       <section className={styles.hero}>
-        <Image src="/images/brand/swan-pair.png" alt="" width={300} height={200} className={styles.heroAnimal} />
+        <Image src="/images/brand/crocodile-single.png" alt="" width={390} height={164} className={styles.heroAnimal} />
         <div className={styles.heroInner}>
           <div className={styles.portraitWrap}>
             <div className={styles.portraitGlow} />
@@ -123,7 +123,6 @@ export default function Home() {
       {/* For galleries & markets */}
       <section className={styles.galleristBand}>
         <div className={styles.galleristLeft}>
-          <Image src="/images/brand/crab.png" alt="" width={64} height={64} className={styles.galleristCrab} />
           <p className={styles.galleristText}>
             Gallerist, stockist or market holder? See the exhibitions, wholesale and market opportunities I&rsquo;m open to — and commission enquiries are always welcome.
           </p>

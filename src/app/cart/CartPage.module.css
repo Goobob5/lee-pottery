@@ -34,6 +34,7 @@
 }
 .emptyIcon {
   height: 90px;
+  width: auto;
   opacity: 0.9;
 }
 .emptyText {
