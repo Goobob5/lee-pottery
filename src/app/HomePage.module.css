@@ -1,6 +1,5 @@
 .hero {
   position: relative;
-  overflow: hidden;
   padding: 20px 56px 18px;
   background: var(--cream-100) url('/images/textures/grain.png');
   border-top: 1px solid var(--cream-300);
@@ -14,18 +13,17 @@
 .heroAnimal {
   position: absolute;
   z-index: 0;
-  right: -30px;
-  bottom: -24px;
-  width: 150px;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 230px;
   height: auto;
   opacity: 0.85;
   pointer-events: none;
 }
-@media (max-width: 760px) {
+@media (max-width: 1199px) {
   .heroAnimal {
-    right: -20px;
-    bottom: -14px;
-    width: 90px;
+    display: none;
   }
 }
 
