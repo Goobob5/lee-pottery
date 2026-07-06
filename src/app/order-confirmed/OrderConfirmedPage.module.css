@@ -1,0 +1,52 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+  padding: 88px 48px;
+  background: var(--cream-100) url('/images/textures/grain.png');
+  border-top: 1px solid var(--cream-300);
+}
+@media (max-width: 760px) {
+  .section {
+    padding: 56px 22px;
+  }
+}
+
+.swan {
+  width: 220px;
+}
+
+.title {
+  margin: 0;
+  font: 600 40px/1.15 var(--font-serif);
+  color: var(--cobalt-900);
+}
+@media (max-width: 760px) {
+  .title {
+    font-size: 28px;
+  }
+}
+
+.body {
+  margin: 0;
+  max-width: 480px;
+  font: 400 17px/1.65 var(--font-serif);
+  color: var(--cobalt-700);
+}
+
+.signature {
+  font: 400 28px/1 var(--font-script);
+  color: var(--cobalt-600);
+}
+
+.warning {
+  margin: 0;
+  max-width: 480px;
+  font: 400 14px/1.5 var(--font-sans);
+  color: var(--cobalt-500);
+  background: var(--cobalt-50);
+  padding: 12px 16px;
+  border-radius: 8px;
+}

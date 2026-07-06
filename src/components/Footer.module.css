@@ -1,0 +1,70 @@
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 36px 56px;
+  background: var(--cream-100);
+  background-image: url('/images/textures/grain.png');
+  border-top: 1.5px solid var(--cobalt-600);
+  flex-wrap: wrap;
+}
+
+@media (max-width: 760px) {
+  .footer {
+    padding: 28px 22px;
+    justify-content: center;
+    text-align: center;
+  }
+  .links {
+    text-align: center !important;
+    align-items: center !important;
+  }
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.wordmark {
+  font: 400 26px/1 var(--font-script);
+  color: var(--cobalt-600);
+}
+
+.tagline {
+  font: 400 14px/1.4 var(--font-serif);
+  color: var(--cobalt-700);
+}
+
+.swan {
+  height: 56px;
+  width: auto;
+  opacity: 0.9;
+}
+
+.links {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  text-align: right;
+  font: 400 13px/1.5 var(--font-sans);
+  color: var(--cobalt-600);
+}
+
+.links a,
+.linkBtn {
+  color: var(--cobalt-600);
+  text-decoration: none;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  text-align: inherit;
+}
+.links a:hover,
+.linkBtn:hover {
+  color: var(--cobalt-800);
+}

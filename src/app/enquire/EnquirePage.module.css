@@ -1,0 +1,195 @@
+.page {
+  border-top: 1px solid var(--cream-300);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  gap: 40px;
+  padding: 56px;
+  align-items: start;
+}
+@media (max-width: 760px) {
+  .layout {
+    grid-template-columns: 1fr;
+    padding: 40px 22px;
+  }
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: sticky;
+  top: 104px;
+}
+@media (max-width: 760px) {
+  .intro {
+    position: static;
+  }
+}
+
+.title {
+  margin: 0;
+  font: 600 40px/1.15 var(--font-serif);
+  color: var(--cobalt-900);
+}
+@media (max-width: 760px) {
+  .title {
+    font-size: 30px;
+  }
+}
+
+.leadText {
+  margin: 0;
+  font: 400 17px/1.65 var(--font-serif);
+  color: var(--cobalt-700);
+}
+
+.subText {
+  margin: 0;
+  font: 400 15px/1.6 var(--font-serif);
+  color: var(--cobalt-600);
+}
+
+.croc {
+  width: 200px;
+  margin-top: 8px;
+  opacity: 0.92;
+}
+
+.formCard {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 560px;
+  padding: 32px;
+  background: var(--cream-100) url('/images/textures/grain.png');
+  border: 1.5px solid var(--cobalt-600);
+  border-radius: 8px;
+}
+@media (max-width: 760px) {
+  .formCard {
+    padding: 22px;
+  }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.fieldRow {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.fieldRow .field {
+  flex: 1 1 200px;
+}
+
+.label {
+  font: 600 12px/1 var(--font-sans);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--cobalt-600);
+}
+
+.topicRow {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.topicChip {
+  font: 500 13px/1 var(--font-sans);
+  padding: 9px 14px;
+  border-radius: 99px;
+  cursor: pointer;
+  border: 1.5px solid var(--cream-300);
+  background: var(--white);
+  color: var(--cobalt-600);
+}
+.topicChip.active {
+  border-color: var(--cobalt-600);
+  background: var(--cobalt-600);
+  color: var(--white);
+}
+
+.input,
+.textarea {
+  font: 400 15px/1.4 var(--font-sans);
+  padding: 12px 14px;
+  border: 1.5px solid var(--cream-300);
+  border-radius: 6px;
+  background: var(--white);
+  color: var(--cobalt-900);
+  outline: none;
+  width: 100%;
+}
+.input:focus,
+.textarea:focus {
+  border-color: var(--cobalt-600);
+}
+.textarea {
+  line-height: 1.55;
+  resize: vertical;
+}
+
+.errorMsg {
+  font: 400 13.5px/1.4 var(--font-sans);
+  color: var(--cobalt-800);
+  background: var(--cobalt-100);
+  padding: 10px 14px;
+  border-radius: 6px;
+}
+
+.submitRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.submitNote {
+  font: 400 13px/1.4 var(--font-sans);
+  color: var(--cobalt-500);
+}
+
+.successCard {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  max-width: 560px;
+  padding: 40px;
+  background: var(--cream-100) url('/images/textures/grain.png');
+  border: 1.5px solid var(--cobalt-600);
+  border-radius: 8px;
+}
+@media (max-width: 760px) {
+  .successCard {
+    padding: 28px 22px;
+  }
+}
+
+.successSwan {
+  height: 80px;
+}
+
+.successTitle {
+  margin: 0;
+  font: 600 28px/1.25 var(--font-serif);
+  color: var(--cobalt-900);
+}
+
+.successBody {
+  margin: 0;
+  font: 400 16px/1.6 var(--font-serif);
+  color: var(--cobalt-700);
+}
+
+.signature {
+  font: 400 24px/1 var(--font-script);
+  color: var(--cobalt-600);
+}

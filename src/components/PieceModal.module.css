@@ -1,0 +1,259 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 4vh 18px;
+  background: rgba(15, 32, 74, 0.5);
+  overflow-y: auto;
+}
+
+.modal {
+  position: relative;
+  width: 100%;
+  max-width: 1040px;
+  margin: auto;
+  background: var(--white);
+  border-radius: 12px;
+  box-shadow: 0 24px 60px rgba(15, 32, 74, 0.32);
+  overflow: hidden;
+}
+
+.closeBtn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 3;
+  width: 40px;
+  height: 40px;
+  border-radius: 99px;
+  border: 1px solid var(--cream-300);
+  background: var(--white);
+  color: var(--cobalt-700);
+  font: 400 21px/1 var(--font-sans);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(15, 32, 74, 0.14);
+}
+.closeBtn:hover {
+  background: var(--cream-100);
+  color: var(--cobalt-900);
+}
+
+.top {
+  display: grid;
+  grid-template-columns: 1fr minmax(340px, 440px);
+}
+@media (max-width: 760px) {
+  .top {
+    grid-template-columns: 1fr;
+  }
+}
+
+.photo {
+  height: 520px;
+}
+@media (max-width: 760px) {
+  .photo {
+    height: 300px;
+  }
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 54px 40px 32px;
+}
+@media (max-width: 760px) {
+  .info {
+    padding: 54px 22px 24px;
+  }
+}
+
+.kicker {
+  font: 600 12px/1 var(--font-sans);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cobalt-500);
+}
+
+.title {
+  margin: 0;
+  font: 600 32px/1.15 var(--font-serif);
+  color: var(--cobalt-900);
+}
+
+.desc {
+  margin: 0;
+  font: 400 16px/1.65 var(--font-serif);
+  color: var(--cobalt-700);
+}
+
+.note {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px 18px;
+  background: var(--cream-100) url('/images/textures/grain.png');
+  border: 1px solid var(--cream-300);
+  border-radius: 8px;
+}
+
+.noteAvatar {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  flex: none;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--cream-200);
+}
+
+.noteText {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.noteText p {
+  margin: 0;
+  font: italic 400 14.5px/1.55 var(--font-serif);
+  color: var(--cobalt-700);
+}
+
+.signature {
+  font: 400 18px/1 var(--font-script);
+  color: var(--cobalt-600);
+}
+
+.specs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 2px 0;
+  font: 400 14px/1.6 var(--font-sans);
+  color: var(--cobalt-600);
+}
+.specRow {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--cream-300);
+  padding-bottom: 8px;
+}
+.specRow span:last-child {
+  color: var(--cobalt-800);
+}
+
+.buyRow {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.price {
+  font: 500 24px/1 var(--font-sans);
+  color: var(--cobalt-900);
+}
+
+.shipNote {
+  margin: 0;
+  font: italic 400 13.5px/1.5 var(--font-serif);
+  color: var(--cobalt-500);
+}
+
+.soldBox {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px;
+  background: var(--cream-200);
+  border-radius: 8px;
+}
+.soldBox span {
+  font: 500 16px/1.4 var(--font-serif);
+  color: var(--cobalt-800);
+}
+
+.recs {
+  padding: 22px 40px 28px;
+  background: var(--cream-100) url('/images/textures/grain.png');
+  border-top: 1px solid var(--cream-300);
+}
+@media (max-width: 760px) {
+  .recs {
+    padding: 20px 22px 24px;
+  }
+}
+
+.recsLabel {
+  font: 600 12px/1 var(--font-sans);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cobalt-500);
+}
+
+.recsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 14px;
+}
+@media (max-width: 760px) {
+  .recsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.recCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  background: var(--white);
+  border: 1px solid var(--cream-300);
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+}
+.recCard:hover {
+  border-color: var(--cobalt-400);
+}
+
+.recPhoto {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  flex: none;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--cream-200);
+}
+
+.recInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.recLabel {
+  font: 600 12px/1.2 var(--font-sans);
+  color: var(--cobalt-600);
+}
+.recName {
+  font: 500 14px/1.25 var(--font-serif);
+  color: var(--cobalt-900);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.recPrice {
+  font: 400 12px/1.2 var(--font-sans);
+  color: var(--cobalt-500);
+}

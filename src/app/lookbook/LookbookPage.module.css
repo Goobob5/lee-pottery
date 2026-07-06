@@ -1,0 +1,77 @@
+.page {
+  border-top: 1px solid var(--cream-300);
+}
+
+.top {
+  display: grid;
+  grid-template-columns: 1fr minmax(300px, 400px);
+  gap: 40px;
+  align-items: end;
+  padding: 56px;
+}
+@media (max-width: 760px) {
+  .top {
+    grid-template-columns: 1fr;
+    padding: 40px 22px;
+  }
+}
+
+.left {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.eyebrow {
+  font: 600 12px/1 var(--font-sans);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cobalt-500);
+}
+
+.title {
+  margin: 0;
+  font: 600 42px/1.15 var(--font-serif);
+  color: var(--cobalt-900);
+}
+@media (max-width: 760px) {
+  .title {
+    font-size: 30px;
+  }
+}
+
+.desc {
+  margin: 0;
+  font: 400 17px/1.6 var(--font-serif);
+  color: var(--cobalt-700);
+  max-width: 560px;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px 22px;
+  background: var(--cream-100) url('/images/textures/grain.png');
+  border: 1.5px solid var(--cobalt-600);
+  border-radius: 8px;
+}
+
+.panelLabel {
+  font: 500 15px/1.4 var(--font-serif);
+  color: var(--cobalt-800);
+}
+
+.panelList {
+  font: 400 14px/1.7 var(--font-sans);
+  color: var(--cobalt-700);
+}
+
+.grid {
+  padding: 0 56px 64px;
+}
+@media (max-width: 760px) {
+  .grid {
+    padding: 0 22px 48px;
+  }
+}
