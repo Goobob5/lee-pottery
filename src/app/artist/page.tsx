@@ -11,8 +11,6 @@ export default function ArtistPage() {
   return (
     <div data-screen-label="Artist">
       <section className={styles.hero}>
-        <Image src="/images/brand/crocodile-pair.png" alt="" width={300} height={200} className={styles.heroCroc} />
-        <Image src="/images/brand/swan-pair.png" alt="" width={300} height={200} className={styles.heroSwan} />
         <h1 className={styles.heroTitle}>The artist</h1>
         <p className={styles.heroSub}>
           Richard Lee, a Sydney ceramicist making sculpture and tableware drawn from the harbour and its estuaries.
@@ -78,7 +76,6 @@ export default function ArtistPage() {
       </section>
 
       <section className={styles.commission}>
-        <Image src="/images/brand/crab.png" alt="" width={100} height={100} className={styles.commissionCrab} />
         <p className={styles.commissionText}>Have something particular in mind? I take a small number of commissions each season.</p>
         <Link href="/enquire">
           <Button>Start a conversation</Button>

@@ -3,7 +3,6 @@
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
 import Button from '@/components/Button';
 import { TOPICS } from '@/lib/products';
 import styles from './EnquirePage.module.css';
@@ -80,7 +79,6 @@ function EnquireForm() {
           I take a small number of commissions each season — dinner sets, one-off sculptural pieces, and gifts
           with a story behind them.
         </p>
-        <Image src="/images/brand/crocodile-single.png" alt="" width={200} height={200} className={styles.croc} />
       </div>
 
       {!sent ? (
@@ -134,7 +132,6 @@ function EnquireForm() {
         </div>
       ) : (
         <div className={styles.successCard}>
-          <Image src="/images/brand/swan-single.png" alt="" width={80} height={80} className={styles.successSwan} />
           <h2 className={styles.successTitle}>Got it — thank you.</h2>
           <p className={styles.successBody}>
             I read every message myself, usually at the end of a studio day. You&rsquo;ll hear back from me within

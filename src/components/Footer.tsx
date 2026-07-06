@@ -9,7 +9,7 @@ export default function Footer() {
         <span className={styles.wordmark}>Lee Pottery</span>
         <span className={styles.tagline}>from my hands, to your home · handmade in Sydney</span>
       </div>
-      <Image src="/images/brand/swan-single.png" alt="" width={56} height={56} className={styles.swan} />
+      <Image src="/images/brand/swan-single.png" alt="" width={433} height={244} className={styles.swan} />
       <div className={styles.links}>
         <Link href="/enquire" className={styles.linkBtn}>Commissions & enquiries</Link>
         <Link href="/lookbook" className={styles.linkBtn}>For galleries & markets</Link>

@@ -47,7 +47,7 @@ export default function CartPage() {
 
         {cartProducts.length === 0 ? (
           <div className={styles.empty}>
-            <Image src="/images/brand/crab.png" alt="" width={90} height={90} className={styles.emptyIcon} />
+            <Image src="/images/brand/crocodile-single.png" alt="" width={390} height={164} className={styles.emptyIcon} />
             <p className={styles.emptyText}>Nothing in here yet — the shelf, on the other hand, is full.</p>
             <Link href="/collection">
               <Button>See the collection</Button>

@@ -12,23 +12,6 @@
   }
 }
 
-.heroCroc {
-  position: absolute;
-  left: 24px;
-  bottom: 24px;
-  width: 200px;
-  max-width: 24vw;
-  opacity: 0.92;
-}
-.heroSwan {
-  position: absolute;
-  right: 24px;
-  bottom: 24px;
-  width: 200px;
-  max-width: 24vw;
-  opacity: 0.92;
-}
-
 .heroTitle {
   margin: 0 auto 12px;
   font: 600 44px/1.15 var(--font-serif);
@@ -197,11 +180,6 @@
   .commission {
     padding: 40px 22px 48px;
   }
-}
-
-.commissionCrab {
-  height: 100px;
-  margin-bottom: 10px;
 }
 
 .commissionText {

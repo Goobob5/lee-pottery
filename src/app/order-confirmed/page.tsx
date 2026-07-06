@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import Button from '@/components/Button';
 import { getStripe } from '@/lib/stripe';
@@ -28,7 +27,6 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
     <div data-screen-label="Order confirmation" style={{ borderTop: '1px solid var(--cream-300)' }}>
       <section className={styles.section}>
         {paid && <ClearCart />}
-        <Image src="/images/brand/swan-pair.png" alt="" width={220} height={150} className={styles.swan} />
         <h1 className={styles.title}>It&rsquo;s on its way to becoming yours.</h1>
         <p className={styles.body}>
           I&rsquo;ll pack it myself this week — plenty of paper, no plastic — and send you a photo of the parcel
