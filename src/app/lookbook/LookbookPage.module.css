@@ -36,7 +36,8 @@
 }
 @media (max-width: 760px) {
   .title {
-    font-size: 30px;
+    font-size: 46px;
+    line-height: 1.02;
   }
 }
 
@@ -45,6 +46,12 @@
   font: 400 17px/1.6 var(--font-serif);
   color: var(--cobalt-700);
   max-width: 560px;
+}
+@media (max-width: 760px) {
+  .desc {
+    font-style: italic;
+    font-size: 15.5px;
+  }
 }
 
 .panel {
@@ -72,6 +79,16 @@
 }
 @media (max-width: 760px) {
   .grid {
+    display: none;
+  }
+}
+
+.editorial {
+  display: none;
+}
+@media (max-width: 760px) {
+  .editorial {
+    display: block;
     padding: 0 22px 48px;
   }
 }

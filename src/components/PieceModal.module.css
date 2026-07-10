@@ -54,15 +54,6 @@
   }
 }
 
-.photo {
-  height: 520px;
-}
-@media (max-width: 760px) {
-  .photo {
-    height: 300px;
-  }
-}
-
 .info {
   display: flex;
   flex-direction: column;

@@ -8,13 +8,8 @@ import ProductPhoto from '@/components/ProductPhoto';
 import LookbookGrid from '@/components/LookbookGrid';
 import { useProductModal } from '@/lib/product-modal-context';
 import { PRODUCTS, getProduct } from '@/lib/products';
+import { SCHEDULE, MARKET_LINE } from '@/lib/schedule';
 import styles from './HomePage.module.css';
-
-const SCHEDULE = [
-  { status: 'Every fourth Saturday', label: 'Kirribilli Markets', detail: 'Monthly · Bradfield Park, Milsons Point' },
-  { status: 'Sep 18–20', label: 'Big Design Market', detail: 'Come find my stall · Sydney' },
-  { status: 'Open now', label: 'Commissions', detail: 'A few slots open this season' },
-];
 
 const INSTAGRAM_URL = 'https://instagram.com/lee.pottery.sydney';
 
@@ -38,6 +33,11 @@ export default function Home() {
 
   return (
     <div data-screen-label="Home">
+      {/* Mobile-only next-market banner, replaces the "Where to find me" cards for a shorter mobile flow */}
+      <div className={styles.marketBanner}>
+        <span><strong>Next market</strong> — {MARKET_LINE}</span>
+      </div>
+
       {/* Intro banner — recreates the market table banner */}
       <section className={styles.hero}>
         <div className={styles.heroInner}>
@@ -132,8 +132,8 @@ export default function Home() {
         </Link>
       </section>
 
-      {/* The lookbook, inline */}
-      <section className={`${styles.section} ${styles.withTopRule}`}>
+      {/* The lookbook, inline — desktop only; mobile links out to the dedicated Lookbook page instead */}
+      <section className={`${styles.section} ${styles.withTopRule} ${styles.lookbookInline}`}>
         <div className={styles.sectionHead}>
           <div className={styles.sectionHeadCol}>
             <h2 className={styles.sectionTitle}>The lookbook</h2>

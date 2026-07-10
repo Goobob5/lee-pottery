@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useProductModal } from '@/lib/product-modal-context';
 import { useCart } from '@/lib/cart-context';
 import { PRODUCTS, getProduct, recommendationsFor } from '@/lib/products';
-import ProductPhoto from './ProductPhoto';
+import PieceGallery from './PieceGallery';
 import Button from './Button';
 import styles from './PieceModal.module.css';
 
@@ -39,12 +39,7 @@ export default function PieceModal() {
         </button>
 
         <div className={styles.top}>
-          <ProductPhoto
-            product={cur}
-            className={styles.photo}
-            priority
-            sizes="(max-width: 760px) 100vw, 440px"
-          />
+          <PieceGallery product={cur} priority />
           <div className={styles.info}>
             <span className={styles.kicker}>{kicker}</span>
             <h2 className={styles.title}>{cur.name}</h2>

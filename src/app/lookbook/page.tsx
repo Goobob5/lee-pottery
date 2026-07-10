@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import Button from '@/components/Button';
 import LookbookGrid from '@/components/LookbookGrid';
+import LookbookEditorial from '@/components/LookbookEditorial';
 import { PRODUCTS } from '@/lib/products';
 import styles from './LookbookPage.module.css';
 
@@ -39,6 +40,10 @@ export default function LookbookPage() {
             Talk to me about stocking my work
           </Button>
         </div>
+      </section>
+      {/* Mobile: photo-forward editorial spread. Desktop: the grid, which already holds up at 1280. */}
+      <section className={styles.editorial}>
+        <LookbookEditorial products={PRODUCTS} />
       </section>
       <section className={styles.grid}>
         <LookbookGrid products={PRODUCTS} />
