@@ -163,3 +163,8 @@
   font: 400 13px/1.4 var(--font-sans);
   color: var(--cobalt-500);
 }
+@media (max-width: 760px) {
+  .cardMeta {
+    display: none;
+  }
+}

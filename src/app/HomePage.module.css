@@ -1,3 +1,27 @@
+/* Mobile-only "next market" banner — sits above the hero, above the portrait's
+   white fade in the stacking order (position + z-index make it a positioned
+   element, so it isn't painted over by the hero's absolutely-positioned glow). */
+.marketBanner {
+  display: none;
+}
+@media (max-width: 760px) {
+  .marketBanner {
+    position: relative;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 20px;
+    background: var(--cobalt-600);
+    color: #fff;
+    font: 500 13px/1.4 var(--font-sans);
+  }
+  .marketBanner strong {
+    font-weight: 600;
+  }
+}
+
 .hero {
   position: relative;
   padding: 20px 56px 18px;
@@ -159,7 +183,7 @@
   color: var(--cobalt-800);
 }
 
-/* Where to find me */
+/* Where to find me — desktop only; the mobile market banner replaces it */
 .findSection {
   padding: 22px 56px;
   background: var(--cream-100) url('/images/textures/grain.png');
@@ -167,7 +191,7 @@
 }
 @media (max-width: 760px) {
   .findSection {
-    padding: 20px 22px;
+    display: none;
   }
 }
 
@@ -406,6 +430,14 @@
 }
 .section.withTopRule {
   border-top: 1.5px solid var(--cobalt-600);
+}
+
+/* Inline lookbook teaser — desktop only; mobile already links to the dedicated
+   Lookbook page from the drawer, so the inline grid would be a redundant scroll. */
+@media (max-width: 760px) {
+  .lookbookInline {
+    display: none;
+  }
 }
 
 .sectionHead {

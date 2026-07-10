@@ -1,4 +1,7 @@
 .header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -6,23 +9,51 @@
   padding: 16px 56px;
   background: var(--white);
   border-bottom: 1px solid var(--cream-300);
-  position: sticky;
-  top: 0;
-  z-index: 20;
 }
 
 @media (max-width: 760px) {
   .header {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 14px;
-    padding: 16px 20px;
+    display: grid;
+    grid-template-columns: 44px 1fr 76px;
+    align-items: center;
+    padding: 0 12px;
+    height: 56px;
   }
+}
+
+.menuBtn {
+  display: none;
+}
+@media (max-width: 760px) {
+  .menuBtn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    width: 44px;
+    height: 44px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+  }
+}
+.menuBar {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: var(--cobalt-700);
 }
 
 .logoLink {
   display: inline-flex;
   align-self: flex-start;
+}
+@media (max-width: 760px) {
+  .logoLink {
+    justify-self: center;
+  }
 }
 
 .logo {
@@ -30,22 +61,36 @@
   width: auto;
   cursor: pointer;
 }
+@media (max-width: 760px) {
+  .logo {
+    height: 24px;
+  }
+}
+
+.cartLinkMobile {
+  display: none;
+}
+@media (max-width: 760px) {
+  .cartLinkMobile {
+    display: block;
+    justify-self: end;
+    font: 500 13px/1 var(--font-sans);
+    color: var(--cobalt-600);
+    text-decoration: none;
+    padding: 12px 4px;
+  }
+}
 
 .nav {
   display: flex;
   gap: 30px;
   justify-content: flex-end;
-  overflow-x: visible;
-  padding-bottom: 2px;
   font: 500 13px/1 var(--font-sans);
   letter-spacing: 0.04em;
 }
-
 @media (max-width: 760px) {
   .nav {
-    gap: 20px;
-    justify-content: flex-start;
-    overflow-x: auto;
+    display: none;
   }
 }
 
@@ -61,4 +106,73 @@
 .navLink:hover {
   color: var(--cobalt-800);
   border-bottom-color: var(--cobalt-600);
+}
+
+/* Mobile drawer */
+.drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 20px;
+  background: var(--cream-100) url('/images/textures/grain.png');
+}
+
+.drawerTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.closeBtn {
+  width: 44px;
+  height: 44px;
+  border-radius: 99px;
+  border: 1px solid var(--cream-300);
+  background: var(--white);
+  color: var(--cobalt-700);
+  font: 400 20px/1 var(--font-sans);
+  cursor: pointer;
+}
+
+.drawerLinks {
+  display: flex;
+  flex-direction: column;
+  margin-top: 24px;
+}
+
+.drawerLink {
+  font: 600 30px/1 var(--font-serif);
+  color: var(--cobalt-900);
+  text-decoration: none;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--cream-300);
+}
+
+.drawerFooter {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 8px;
+}
+
+.drawerFooterLabel {
+  font: 600 11px/1 var(--font-sans);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cobalt-500);
+}
+
+.drawerFooterMarket {
+  font: 500 16px/1.4 var(--font-serif);
+  color: var(--cobalt-900);
+}
+
+.drawerFooterLink {
+  font: 500 13px/1.4 var(--font-sans);
+  color: var(--cobalt-600);
+  text-decoration: none;
 }

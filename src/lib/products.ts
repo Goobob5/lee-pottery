@@ -8,6 +8,8 @@ export type Product = {
   sold: boolean;
   /** Path under /public, or null if no photo has been supplied yet. */
   image: string | null;
+  /** Extra angles/detail shots, in display order. Optional — most pieces only have `image` so far. */
+  photos?: string[];
   meta: string;
   dims: string;
   material: string;
