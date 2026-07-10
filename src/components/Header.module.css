@@ -53,6 +53,7 @@
 @media (max-width: 760px) {
   .logoLink {
     justify-self: center;
+    align-self: center;
   }
 }
 
