@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useProductModal } from '@/lib/product-modal-context';
 import { useCart } from '@/lib/cart-context';
@@ -78,6 +79,11 @@ export default function PieceModal() {
                     {inCart ? 'In your cart' : 'Take me home'}
                   </Button>
                 </div>
+                {inCart && (
+                  <Link href="/cart" className={styles.checkoutLink} onClick={closeModal}>
+                    Go to checkout →
+                  </Link>
+                )}
                 <p className={styles.shipNote}>
                   Pick me up! I&rsquo;m precious, but I&rsquo;m not fragile — carefully packed and shipped anywhere in Australia.
                 </p>

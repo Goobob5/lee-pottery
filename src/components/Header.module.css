@@ -53,17 +53,18 @@
 @media (max-width: 760px) {
   .logoLink {
     justify-self: center;
+    align-self: center;
   }
 }
 
 .logo {
-  height: 30px;
+  height: 35px;
   width: auto;
   cursor: pointer;
 }
 @media (max-width: 760px) {
   .logo {
-    height: 24px;
+    height: 28px;
   }
 }
 

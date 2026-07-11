@@ -39,8 +39,8 @@ export default function Header() {
         <Image
           src="/images/brand/lee-pottery-logotype.png"
           alt="Lee Pottery"
-          width={160}
-          height={30}
+          width={174}
+          height={35}
           className={styles.logo}
           priority
         />
@@ -62,8 +62,8 @@ export default function Header() {
             <Image
               src="/images/brand/lee-pottery-logotype.png"
               alt="Lee Pottery"
-              width={160}
-              height={30}
+              width={174}
+              height={35}
               className={styles.logo}
             />
             <button aria-label="Close" className={styles.closeBtn} onClick={closeDrawer}>

@@ -23,15 +23,12 @@ export default function LookbookPage() {
         </div>
         <div className={styles.panel}>
           <span className={styles.panelLabel}>I&rsquo;m open to</span>
-          <span className={styles.panelList}>
-            Gallery exhibitions · group or solo
-            <br />
-            Retail stockists · consignment or wholesale
-            <br />
-            Market stalls & maker fairs
-            <br />
-            Collaborations with chefs & florists
-          </span>
+          <ul className={styles.panelList}>
+            <li>Gallery exhibitions — group or solo</li>
+            <li>Retail stockists — consignment or wholesale</li>
+            <li>Market stalls & maker fairs</li>
+            <li>Collaborations with chefs & florists</li>
+          </ul>
           <Button
             variant="secondary"
             style={{ width: '100%' }}
