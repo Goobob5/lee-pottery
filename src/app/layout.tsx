@@ -6,6 +6,7 @@ import { ProductModalProvider } from '@/lib/product-modal-context';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import PieceModal from '@/components/PieceModal';
+import { Analytics } from '@vercel/analytics/next';
 
 const kaushan = Kaushan_Script({
   weight: '400',
@@ -44,6 +45,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <PieceModal />
           </ProductModalProvider>
         </CartProvider>
+        <Analytics />
       </body>
     </html>
   );
