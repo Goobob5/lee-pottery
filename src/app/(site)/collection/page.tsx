@@ -3,14 +3,16 @@
 import { useState } from 'react';
 import ProductPhoto from '@/components/ProductPhoto';
 import { useProductModal } from '@/lib/product-modal-context';
-import { PRODUCTS, FILTER_TYPES } from '@/lib/products';
+import { useCatalog } from '@/lib/catalog-context';
+import { FILTER_TYPES } from '@/lib/products';
 import styles from './CollectionPage.module.css';
 
 export default function CollectionPage() {
   const { openProduct } = useProductModal();
+  const { products } = useCatalog();
   const [filter, setFilter] = useState<string>('All');
 
-  const list = PRODUCTS.filter((p) => filter === 'All' || p.type === filter);
+  const list = products.filter((p) => filter === 'All' || p.type === filter);
 
   return (
     <div className={styles.page} data-screen-label="Collection">

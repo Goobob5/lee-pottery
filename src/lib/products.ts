@@ -6,6 +6,10 @@ export type Product = {
   oneOfAKind: boolean;
   batch?: string;
   sold: boolean;
+  /** Units on hand. One-of-a-kind pieces are 0 or 1; batch pieces count down
+   * as they sell. Optional on the static seed catalog (defaults to 1 when
+   * available, 0 when sold) — always present on database-loaded products. */
+  stock?: number;
   /** Path under /public, or null if no photo has been supplied yet. */
   image: string | null;
   /** Extra angles/detail shots, in display order. Optional — most pieces only have `image` so far. */
@@ -51,14 +55,14 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: 'crocodile-mugs', name: 'Crocodile mug pair', type: 'Mugs', price: 140,
-    oneOfAKind: false, batch: 'Small batch of six', sold: false, image: '/images/products/crocodile-mugs.webp',
+    oneOfAKind: false, batch: 'Small batch of six', sold: false, stock: 3, image: '/images/products/crocodile-mugs.webp',
     meta: 'Small batch of six · 350 ml', dims: '350 ml each', material: 'Speckled stoneware, cobalt brushwork',
     desc: 'Two mugs, two crocodiles — one grinning, one napping. Sold as a pair.',
     note: 'The crocodiles are from a trip up north. They behave in the dishwasher.',
   },
   {
     id: 'dinner-plates', name: 'Dinner plates, set of four', type: 'Plates', price: 320,
-    oneOfAKind: false, batch: 'Limited run', sold: false, image: null,
+    oneOfAKind: false, batch: 'Limited run', sold: false, stock: 2, image: null,
     meta: 'Limited run · 27 cm', dims: '27 cm each', material: 'Speckled stoneware, clear glaze',
     desc: 'Four dinner plates with a different harbour bird on each — no two settings alike.',
     note: 'Set the table and your guests will argue over who gets the swan.',
@@ -79,14 +83,14 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: 'milk-bottle', name: 'Milk bottle, cobalt drip', type: 'Bottles', price: 220,
-    oneOfAKind: false, batch: 'Small batch', sold: false, image: null,
+    oneOfAKind: false, batch: 'Small batch', sold: false, stock: 4, image: null,
     meta: 'Small batch · 19 cm', dims: '19 cm tall, 500 ml', material: 'Stoneware, dipped cobalt rim',
     desc: 'A stout little bottle for milk, dressing or a single stem — dipped rim, honest form.',
     note: 'The drip is different on every one. Yours will be yours.',
   },
   {
     id: 'swan-mug', name: 'Swan mug', type: 'Mugs', price: 85,
-    oneOfAKind: false, batch: 'Small batch', sold: false, image: null,
+    oneOfAKind: false, batch: 'Small batch', sold: false, stock: 6, image: null,
     meta: 'Small batch · 300 ml', dims: '300 ml', material: 'Speckled stoneware, cobalt brushwork',
     desc: 'A morning mug with a swan gliding around it. The handle sits just right.',
     note: 'I make a few of these every firing and they always go first.',

@@ -1,0 +1,212 @@
+/* Photoshoot-day SOP — big tap targets, readable at arm's length
+   next to a lightbox with the studio lights on. */
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.title {
+  font-family: var(--font-serif);
+  font-size: 28px;
+  color: var(--cobalt-900);
+  margin: 0;
+}
+
+.subtitle {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: var(--cobalt-500);
+}
+
+.resetBtn {
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  border: var(--border-width-default) solid var(--cobalt-200);
+  background: transparent;
+  color: var(--cobalt-700);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.resetBtn:hover {
+  background: var(--cobalt-50);
+}
+
+.section {
+  background: var(--white);
+  border: var(--border-width-hairline) solid var(--cobalt-100);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.sectionHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+
+.sectionTitle {
+  font-family: var(--font-serif);
+  font-size: 20px;
+  color: var(--cobalt-900);
+  margin: 0;
+}
+
+.sectionCount {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--cobalt-400);
+  white-space: nowrap;
+}
+
+.sectionBlurb {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--cobalt-500);
+  line-height: 1.5;
+}
+
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.step {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  border: var(--border-width-hairline) solid var(--cream-200);
+  background: var(--cream-50);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-standard);
+}
+
+.step:hover {
+  background: var(--cobalt-50);
+}
+
+.stepDone {
+  background: var(--cream-100);
+  border-color: var(--cream-200);
+}
+
+.stepDone .stepLabel {
+  text-decoration: line-through;
+  color: var(--cobalt-300);
+}
+
+.stepDone .stepTip {
+  color: var(--cobalt-200);
+}
+
+.checkbox {
+  width: 22px;
+  height: 22px;
+  margin: 1px 0 0;
+  accent-color: var(--cobalt-600);
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.stepText {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.stepLabel {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--cobalt-900);
+  line-height: 1.4;
+}
+
+.stepTip {
+  font-size: 13px;
+  color: var(--cobalt-500);
+  line-height: 1.5;
+}
+
+.pieceNameInput {
+  font: inherit;
+  font-size: 15px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  border: var(--border-width-default) solid var(--cobalt-200);
+  background: var(--white);
+  color: var(--ink-900);
+  width: 100%;
+}
+
+.pieceNameInput:focus {
+  outline: 2px solid var(--cobalt-400);
+  outline-offset: 1px;
+}
+
+.nextPieceBtn {
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  padding: 14px 18px;
+  border-radius: var(--radius-md);
+  border: none;
+  background: var(--cobalt-600);
+  color: var(--white);
+  cursor: pointer;
+  width: 100%;
+}
+
+.nextPieceBtn:hover:not(:disabled) {
+  background: var(--cobalt-700);
+}
+
+.nextPieceBtn:disabled {
+  background: var(--cream-200);
+  color: var(--cobalt-300);
+  cursor: not-allowed;
+}
+
+.doneList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.doneLabel {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--cobalt-500);
+}
+
+.doneChip {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--cobalt-100);
+  color: var(--cobalt-800);
+}

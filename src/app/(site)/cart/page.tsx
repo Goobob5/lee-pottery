@@ -6,7 +6,8 @@ import Image from 'next/image';
 import Button from '@/components/Button';
 import ProductPhoto from '@/components/ProductPhoto';
 import { useCart } from '@/lib/cart-context';
-import { PRODUCTS } from '@/lib/products';
+import { useCatalog } from '@/lib/catalog-context';
+import type { Product } from '@/lib/products';
 import styles from './CartPage.module.css';
 
 function redirectTo(url: string) {
@@ -15,10 +16,11 @@ function redirectTo(url: string) {
 
 export default function CartPage() {
   const { cartIds, removeFromCart } = useCart();
+  const { products } = useCatalog();
   const [checkingOut, setCheckingOut] = useState(false);
   const [error, setError] = useState('');
 
-  const cartProducts = cartIds.map((id) => PRODUCTS.find((p) => p.id === id)).filter((p): p is typeof PRODUCTS[number] => !!p);
+  const cartProducts = cartIds.map((id) => products.find((p) => p.id === id)).filter((p): p is Product => !!p);
   const subtotal = cartProducts.reduce((sum, p) => sum + p.price, 0);
   const total = subtotal + (cartProducts.length ? 25 : 0);
 

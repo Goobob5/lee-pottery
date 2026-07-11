@@ -4,7 +4,8 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useProductModal } from '@/lib/product-modal-context';
 import { useCart } from '@/lib/cart-context';
-import { PRODUCTS, getProduct, recommendationsFor } from '@/lib/products';
+import { useCatalog } from '@/lib/catalog-context';
+import { recommendationsFor } from '@/lib/products';
 import PieceGallery from './PieceGallery';
 import Button from './Button';
 import styles from './PieceModal.module.css';
@@ -12,13 +13,14 @@ import styles from './PieceModal.module.css';
 export default function PieceModal() {
   const { openId, openProduct, closeModal } = useProductModal();
   const { addToCart, isInCart } = useCart();
+  const { products, getProduct } = useCatalog();
   const router = useRouter();
 
   if (!openId) return null;
   const cur = getProduct(openId);
   if (!cur) return null;
 
-  const recs = recommendationsFor(PRODUCTS, cur);
+  const recs = recommendationsFor(products, cur);
   const inCart = isInCart(cur.id);
   const kicker = cur.sold ? 'Sold' : cur.oneOfAKind ? 'One of a kind' : cur.batch || 'Small batch';
 

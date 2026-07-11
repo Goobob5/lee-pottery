@@ -1,11 +1,10 @@
 import type { Metadata } from 'next';
 import { Kaushan_Script, Playfair_Display, Work_Sans } from 'next/font/google';
 import './globals.css';
-import { CartProvider } from '@/lib/cart-context';
-import { ProductModalProvider } from '@/lib/product-modal-context';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
-import PieceModal from '@/components/PieceModal';
+
+// The catalog is read from the database on every request (stock changes as
+// pieces sell at markets), so the whole site renders dynamically.
+export const dynamic = 'force-dynamic';
 
 const kaushan = Kaushan_Script({
   weight: '400',
@@ -35,16 +34,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${kaushan.variable} ${playfair.variable} ${workSans.variable}`}>
-      <body>
-        <CartProvider>
-          <ProductModalProvider>
-            <Header />
-            <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>{children}</main>
-            <Footer />
-            <PieceModal />
-          </ProductModalProvider>
-        </CartProvider>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

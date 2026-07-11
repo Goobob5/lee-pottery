@@ -7,7 +7,7 @@ import Button from '@/components/Button';
 import ProductPhoto from '@/components/ProductPhoto';
 import LookbookGrid from '@/components/LookbookGrid';
 import { useProductModal } from '@/lib/product-modal-context';
-import { PRODUCTS, getProduct } from '@/lib/products';
+import { useCatalog } from '@/lib/catalog-context';
 import { SCHEDULE, MARKET_LINE } from '@/lib/schedule';
 import styles from './HomePage.module.css';
 
@@ -25,11 +25,12 @@ function InstagramIcon({ size = 18 }: { size?: number }) {
 
 export default function Home() {
   const { openProduct } = useProductModal();
+  const { products, getProduct } = useCatalog();
   const [heroId, setHeroId] = useState('swan-platter-3');
 
-  const hero = getProduct(heroId) || PRODUCTS[0];
+  const hero = getProduct(heroId) || products[0];
   const heroKicker = hero.oneOfAKind ? 'One of a kind' : hero.batch || 'Small batch';
-  const homeThumbs = PRODUCTS.filter((p) => p.id !== hero.id && !p.sold).slice(0, 4);
+  const homeThumbs = products.filter((p) => p.id !== hero.id && !p.sold).slice(0, 4);
 
   return (
     <div data-screen-label="Home">
@@ -141,7 +142,7 @@ export default function Home() {
           </div>
           <Link href="/collection" className={styles.textLink}>See the full collection →</Link>
         </div>
-        <LookbookGrid products={PRODUCTS} />
+        <LookbookGrid products={products} />
       </section>
 
       {/* Instagram — newest from the studio */}

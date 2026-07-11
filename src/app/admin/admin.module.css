@@ -1,0 +1,383 @@
+/* Admin — phone-first, same brand tokens as the site but plainer:
+   this is Richard's workbench, not the shopfront. */
+
+.page {
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  padding: var(--space-3) var(--space-4);
+  background: var(--white);
+  border-bottom: var(--border-width-default) solid var(--cobalt-100);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.navBrand {
+  font-family: var(--font-script);
+  font-size: 20px;
+  color: var(--cobalt-800);
+  margin-right: var(--space-2);
+  text-decoration: none;
+}
+
+.navLink {
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  color: var(--cobalt-700);
+}
+
+.navLink:hover {
+  background: var(--cobalt-50);
+}
+
+.navLinkActive {
+  background: var(--cobalt-100);
+}
+
+.navSpacer {
+  flex: 1;
+}
+
+.navMuted {
+  font-size: 13px;
+  color: var(--cobalt-400);
+}
+
+.title {
+  font-family: var(--font-serif);
+  font-size: 28px;
+  color: var(--cobalt-900);
+  margin: 0;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 14px;
+  color: var(--cobalt-500);
+}
+
+.banner {
+  background: #fff7e6;
+  border: var(--border-width-default) solid #e8c66b;
+  color: #6b5312;
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.card {
+  background: var(--white);
+  border: var(--border-width-hairline) solid var(--cobalt-100);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+/* ---- Piece list ---- */
+
+.pieceRow {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: var(--border-width-hairline) solid var(--cream-200);
+  align-items: center;
+}
+
+.pieceRow:last-child {
+  border-bottom: none;
+}
+
+.thumb {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-md);
+  background: var(--cream-200);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.thumbEmpty {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-md);
+  background: var(--cream-200);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: var(--cobalt-300);
+  text-align: center;
+}
+
+.pieceInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pieceName {
+  font-weight: 600;
+  color: var(--cobalt-900);
+  font-size: 15px;
+  text-decoration: none;
+}
+
+.pieceName:hover {
+  text-decoration: underline;
+}
+
+.pieceMeta {
+  font-size: 12.5px;
+  color: var(--cobalt-400);
+}
+
+.pieceActions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.actionRow {
+  display: flex;
+  gap: 6px;
+}
+
+.badge {
+  display: inline-block;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+
+.badgeAvailable {
+  background: #e5f4e9;
+  color: #1c6b33;
+}
+
+.badgeSold {
+  background: var(--cream-200);
+  color: var(--cobalt-500);
+}
+
+.badgeReserved {
+  background: #fff3d6;
+  color: #8a6410;
+}
+
+/* ---- Buttons ---- */
+
+.btn {
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  border: var(--border-width-default) solid var(--cobalt-600);
+  background: var(--cobalt-600);
+  color: var(--white);
+  cursor: pointer;
+  min-height: 36px;
+}
+
+.btn:hover {
+  background: var(--cobalt-700);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btnGhost {
+  background: transparent;
+  color: var(--cobalt-700);
+  border-color: var(--cobalt-200);
+}
+
+.btnGhost:hover {
+  background: var(--cobalt-50);
+}
+
+.btnDanger {
+  background: transparent;
+  color: #a02b1e;
+  border-color: #d9a49e;
+}
+
+.btnDanger:hover {
+  background: #fbeeec;
+}
+
+.btnSmall {
+  font-size: 12.5px;
+  padding: 5px 10px;
+  min-height: 30px;
+}
+
+/* ---- Forms ---- */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fieldRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--cobalt-800);
+}
+
+.hint {
+  font-size: 12px;
+  color: var(--cobalt-400);
+  line-height: 1.45;
+}
+
+.input,
+.select,
+.textarea {
+  font: inherit;
+  font-size: 15px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  border: var(--border-width-default) solid var(--cobalt-200);
+  background: var(--white);
+  color: var(--ink-900);
+  width: 100%;
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus {
+  outline: 2px solid var(--cobalt-400);
+  outline-offset: 1px;
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 70px;
+}
+
+.checkRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 14px;
+  color: var(--cobalt-800);
+  font-weight: 600;
+}
+
+.formActions {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.error {
+  color: #a02b1e;
+  font-size: 14px;
+}
+
+/* ---- Login ---- */
+
+.loginWrap {
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+}
+
+.loginCard {
+  width: 100%;
+  max-width: 360px;
+  background: var(--white);
+  border: var(--border-width-hairline) solid var(--cobalt-100);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.loginBrand {
+  font-family: var(--font-script);
+  font-size: 26px;
+  color: var(--cobalt-800);
+  margin: 0;
+}
+
+/* ---- Orders ---- */
+
+.orderRow {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: var(--border-width-hairline) solid var(--cream-200);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+}
+
+.orderRow:last-child {
+  border-bottom: none;
+}
+
+.orderHead {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font-weight: 700;
+  color: var(--cobalt-900);
+}
+
+.orderDetail {
+  color: var(--cobalt-500);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.emptyState {
+  padding: var(--space-6);
+  text-align: center;
+  color: var(--cobalt-400);
+  font-size: 14px;
+}
