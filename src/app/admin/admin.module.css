@@ -381,3 +381,142 @@
   color: var(--cobalt-400);
   font-size: 14px;
 }
+
+/* ---- Listing pipeline: /admin/new-piece ---- */
+
+.pickGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.pickThumb {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  border: var(--border-width-hairline) solid var(--cobalt-100);
+  background: var(--cream-200);
+}
+
+.progress {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.progressStep {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: 15px;
+  color: var(--cobalt-400);
+}
+
+.progressNow {
+  color: var(--cobalt-900);
+  font-weight: 600;
+}
+
+.progressDone {
+  color: var(--cobalt-600);
+}
+
+.progressDot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--cream-200);
+  border: var(--border-width-hairline) solid var(--cobalt-100);
+  font-size: 13px;
+  flex: none;
+}
+
+.progressDone .progressDot {
+  background: var(--cobalt-100);
+  color: var(--cobalt-700);
+}
+
+.progressNow .progressDot {
+  background: var(--cobalt-50);
+  color: var(--cobalt-800);
+}
+
+/* ---- Review photo strip ---- */
+
+.photoStrip {
+  list-style: none;
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.photoItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 120px;
+}
+
+.photoThumb {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--cream-200);
+  border: var(--border-width-hairline) solid var(--cobalt-100);
+}
+
+.photoImg {
+  object-fit: cover;
+}
+
+.photoHero {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--cobalt-800);
+  color: var(--white);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.photoBtns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+
+.photoBtns button {
+  min-width: 30px;
+  padding: 4px 8px;
+  border-radius: var(--radius-md);
+  border: var(--border-width-hairline) solid var(--cobalt-100);
+  background: var(--white);
+  color: var(--cobalt-700);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.photoBtns button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.photoHeroBtn {
+  font-weight: 600;
+}
