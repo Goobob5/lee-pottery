@@ -35,6 +35,8 @@ npm run dev
 | `STRIPE_WEBHOOK_SECRET` | Stripe dashboard → Webhooks. Point an endpoint at `/api/stripe-webhook` with events `checkout.session.completed` + `checkout.session.expired`; copy its signing secret. (`stripe listen --forward-to localhost:3000/api/stripe-webhook` in dev.) | Sales don't mark pieces sold automatically and no order lands in `/admin/orders`. |
 | `DATABASE_URL` | A [Neon](https://neon.tech) free-tier database's pooled connection string (or any Postgres). Tables + starting catalog are created automatically. | Site serves the static placeholder catalog from `src/lib/products.ts`; admin stock control is disabled. |
 | `ADMIN_PASSWORD` | Make one up — long and random. | `/admin` can't be logged into. |
+| `BLOB_READ_WRITE_TOKEN` | A [Vercel Blob](https://vercel.com/docs/storage/vercel-blob) store's read-write token (added automatically when you create a Blob store in the Vercel project). | Phone uploads at `/admin/new-piece` are written to `public/uploads/` on the running machine instead of Blob — fine locally, not in production. |
+| `ANTHROPIC_API_KEY` (optional) | [console.anthropic.com](https://console.anthropic.com). | The listing pipeline still processes and attaches photos, but the fields come up empty instead of being drafted in your voice. |
 | `NEXT_PUBLIC_FORMSPREE_ENDPOINT` | Create a form at [formspree.io](https://formspree.io), copy its endpoint. | The Enquire form shows a clear setup error instead of sending. |
 | `RESEND_API_KEY` (optional) | [resend.com](https://resend.com), with the sending domain verified. Also see `ORDER_NOTIFY_TO` / `ORDER_NOTIFY_FROM` in `.env.example`. | No email nudge on a sale — orders still appear in `/admin/orders` and Stripe. |
 
@@ -63,6 +65,11 @@ silently pretending to succeed — safe to deploy before everything is configure
 Single password (`ADMIN_PASSWORD`), 30-day signed session cookie. Pages:
 
 - **Pieces** — stock control + edit/add/delete listings
+- **Add a piece** (`/admin/new-piece`) — the phone-first listing pipeline:
+  upload the raw shots, type the measurements and one sentence, and the server
+  crops/levels/resizes them and (with `ANTHROPIC_API_KEY`) drafts every field
+  in Richard's voice. Review the prefilled form, set the price, publish.
+  Nothing goes live without review.
 - **Photoshoot day** (`/admin/shoot`) — interactive end-to-end SOP for
   shooting and publishing pieces; progress persists on the phone
 - **Orders** — online orders as recorded by the webhook
@@ -92,9 +99,10 @@ rest render as labeled "Photo coming soon" frames:
 - **Batch stock isn't held during checkout** — only one-of-a-kind pieces get
   the 30-minute hold. Two buyers racing for the last swan mug is possible
   and resolved by a refund; at this volume it isn't worth the complexity.
-- **Product photos are repo files**, referenced by path from the database.
-  Uploading from the phone (Vercel Blob) is part of the Phase 2 listing
-  pipeline.
+- **Product photos** come from Vercel Blob (uploaded at `/admin/new-piece`) or,
+  for the seed catalog, repo files under `public/images/products/`. The database
+  stores whichever URL/path applies and the site renders both — remote Blob URLs
+  are allow-listed for `next/image` in `next.config.ts`.
 - **Shipping is a flat $25 line item** — real price bands and free
   market-pickup options are Phase 3 (`SHIPPING_CENTS` in
   `src/app/api/checkout/route.ts`).

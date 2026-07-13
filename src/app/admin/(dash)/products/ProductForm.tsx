@@ -1,15 +1,33 @@
 import { FILTER_TYPES } from '@/lib/products';
 import type { AdminProduct } from '@/lib/db';
+import type { ListingDraft } from '@/lib/listing';
 import { deleteProductAction, saveProductAction } from '@/lib/admin-actions';
 import ConfirmButton from '../../ConfirmButton';
+import PhotoStrip from './PhotoStrip';
 import styles from '../../admin.module.css';
 
 const TYPES = FILTER_TYPES.filter((t) => t !== 'All');
 
+type ProductFormProps = {
+  piece?: AdminProduct;
+  /** AI-drafted starting values when adding a piece via the listing pipeline. */
+  draft?: Partial<ListingDraft>;
+  /** Processed photo URLs to review/reorder; replaces the manual path fields. */
+  photos?: string[];
+  /** Index of the photo the drafter picked as hero. */
+  heroIndex?: number;
+  /** Default for the "one of a kind" checkbox (from the piece's kind). */
+  defaultOneOfAKind?: boolean;
+};
+
 /** Shared create/edit form. Server-rendered on purpose — plain HTML forms
- * posting to server actions work on a flaky market-day connection. */
-export default function ProductForm({ piece }: { piece?: AdminProduct }) {
+ * posting to server actions work on a flaky market-day connection. Also used
+ * as the listing-pipeline review screen: pass `draft` + `photos` to prefill
+ * from the AI and swap the manual photo-path fields for a reorderable strip. */
+export default function ProductForm({ piece, draft, photos, heroIndex = 0, defaultOneOfAKind }: ProductFormProps) {
   const editing = !!piece;
+  const reviewing = !!photos;
+  const oneOfAKindDefault = piece?.oneOfAKind ?? defaultOneOfAKind ?? true;
 
   return (
     <>
@@ -18,14 +36,14 @@ export default function ProductForm({ piece }: { piece?: AdminProduct }) {
 
         <div className={styles.field}>
           <label className={styles.label} htmlFor="name">Name</label>
-          <input id="name" name="name" className={styles.input} defaultValue={piece?.name} required />
+          <input id="name" name="name" className={styles.input} defaultValue={piece?.name ?? draft?.name} required />
           {!editing && <span className={styles.hint}>The web address is made from the name automatically.</span>}
         </div>
 
         <div className={styles.fieldRow}>
           <div className={styles.field}>
             <label className={styles.label} htmlFor="type">Type</label>
-            <select id="type" name="type" className={styles.select} defaultValue={piece?.type ?? 'Bowls'}>
+            <select id="type" name="type" className={styles.select} defaultValue={piece?.type ?? draft?.type ?? 'Bowls'}>
               {TYPES.map((t) => (
                 <option key={t} value={t}>{t}</option>
               ))}
@@ -44,7 +62,7 @@ export default function ProductForm({ piece }: { piece?: AdminProduct }) {
           <div className={styles.field}>
             <span className={styles.label}>Kind</span>
             <label className={styles.checkRow}>
-              <input type="checkbox" name="oneOfAKind" defaultChecked={piece?.oneOfAKind ?? true} />
+              <input type="checkbox" name="oneOfAKind" defaultChecked={oneOfAKindDefault} />
               One of a kind
             </label>
             <span className={styles.hint}>Untick for batch pieces (mugs, sets) and set the stock count.</span>
@@ -70,52 +88,58 @@ export default function ProductForm({ piece }: { piece?: AdminProduct }) {
         <div className={styles.fieldRow}>
           <div className={styles.field}>
             <label className={styles.label} htmlFor="dims">Size</label>
-            <input id="dims" name="dims" className={styles.input} defaultValue={piece?.dims} placeholder="e.g. 21 cm across, 9 cm deep" />
+            <input id="dims" name="dims" className={styles.input} defaultValue={piece?.dims ?? draft?.dims} placeholder="e.g. 21 cm across, 9 cm deep" />
           </div>
           <div className={styles.field}>
             <label className={styles.label} htmlFor="material">Clay & glaze</label>
-            <input id="material" name="material" className={styles.input} defaultValue={piece?.material} placeholder="e.g. Speckled stoneware, cobalt brushwork" />
+            <input id="material" name="material" className={styles.input} defaultValue={piece?.material ?? draft?.material} placeholder="e.g. Speckled stoneware, cobalt brushwork" />
           </div>
         </div>
 
         <div className={styles.field}>
           <label className={styles.label} htmlFor="meta">Card line</label>
-          <input id="meta" name="meta" className={styles.input} defaultValue={piece?.meta} placeholder="e.g. Speckled stoneware, unglazed rim · 21 cm" />
+          <input id="meta" name="meta" className={styles.input} defaultValue={piece?.meta ?? draft?.meta} placeholder="e.g. Speckled stoneware, unglazed rim · 21 cm" />
           <span className={styles.hint}>The short line under the name on collection cards.</span>
         </div>
 
         <div className={styles.field}>
           <label className={styles.label} htmlFor="desc">Description</label>
-          <textarea id="desc" name="desc" className={styles.textarea} defaultValue={piece?.desc} rows={3} />
+          <textarea id="desc" name="desc" className={styles.textarea} defaultValue={piece?.desc ?? draft?.desc} rows={3} />
         </div>
 
         <div className={styles.field}>
           <label className={styles.label} htmlFor="note">Your note</label>
-          <textarea id="note" name="note" className={styles.textarea} defaultValue={piece?.note} rows={3} />
+          <textarea id="note" name="note" className={styles.textarea} defaultValue={piece?.note ?? draft?.note} rows={3} />
           <span className={styles.hint}>The personal line signed “Richard” on the piece page — your voice, keep it yours.</span>
         </div>
 
-        <div className={styles.field}>
-          <label className={styles.label} htmlFor="image">Main photo path</label>
-          <input id="image" name="image" className={styles.input} defaultValue={piece?.image ?? ''} placeholder="/images/products/estuary-bowl.webp" />
-          <span className={styles.hint}>
-            Photos live in the site repo under <code>public/images/products/</code> for now — drop the file
-            in there (or ask Claude to), then put its path here. Direct upload comes with the listing pipeline.
-          </span>
-        </div>
+        {reviewing ? (
+          <PhotoStrip photos={photos} initialHero={heroIndex} />
+        ) : (
+          <>
+            <div className={styles.field}>
+              <label className={styles.label} htmlFor="image">Main photo path</label>
+              <input id="image" name="image" className={styles.input} defaultValue={piece?.image ?? ''} placeholder="/images/products/estuary-bowl.webp" />
+              <span className={styles.hint}>
+                Photos live in the site repo under <code>public/images/products/</code>, or upload straight from
+                your phone at <code>/admin/new-piece</code>. Drop a file in and put its path here, or paste a URL.
+              </span>
+            </div>
 
-        <div className={styles.field}>
-          <label className={styles.label} htmlFor="photos">Extra photo paths</label>
-          <textarea
-            id="photos" name="photos" className={styles.textarea} rows={3}
-            defaultValue={piece?.photos?.join('\n') ?? ''}
-            placeholder={'/images/products/estuary-bowl-top.webp\n/images/products/estuary-bowl-detail.webp'}
-          />
-          <span className={styles.hint}>One per line, in display order — angles and details for the piece gallery.</span>
-        </div>
+            <div className={styles.field}>
+              <label className={styles.label} htmlFor="photos">Extra photo paths</label>
+              <textarea
+                id="photos" name="photos" className={styles.textarea} rows={3}
+                defaultValue={piece?.photos?.join('\n') ?? ''}
+                placeholder={'/images/products/estuary-bowl-top.webp\n/images/products/estuary-bowl-detail.webp'}
+              />
+              <span className={styles.hint}>One per line, in display order — angles and details for the piece gallery.</span>
+            </div>
+          </>
+        )}
 
         <div className={styles.formActions}>
-          <button type="submit" className={styles.btn}>{editing ? 'Save changes' : 'Add piece'}</button>
+          <button type="submit" className={styles.btn}>{editing ? 'Save changes' : reviewing ? 'Publish piece' : 'Add piece'}</button>
         </div>
       </form>
 

@@ -8,8 +8,9 @@ import styles from './Shoot.module.css';
  *
  * The end-to-end listing process: prep the night before, rig the lightbox
  * once, then a repeatable per-piece loop (shots + facts while the piece is
- * in your hands), then transfer/edit/upload. Progress persists in
- * localStorage so it survives the phone locking between pieces.
+ * in your hands), then publish each piece straight from the phone at
+ * /admin/new-piece. Progress persists in localStorage so it survives the
+ * phone locking between pieces.
  */
 
 type Step = { id: string; label: string; tip?: string };
@@ -121,29 +122,14 @@ const PER_PIECE: Step[] = [
 
 const WRAP: Step[] = [
   {
-    id: 'wrap-transfer',
-    label: 'Transfer photos to the computer, one folder per shoot date',
-    tip: 'Quick Share or cable. The slate frames mark where each piece starts.',
-  },
-  {
     id: 'wrap-cull',
-    label: 'Cull to the best ~6 per piece, delete the rest now',
-    tip: 'Hero, front, top, detail, scale (+ group for batches). “I’ll cull later” is how 400 photos never become listings.',
+    label: 'Cull to the best ~6 per piece, right in the camera roll',
+    tip: 'Hero, front, top, detail, scale (+ group for batches). Delete the rest now — “I’ll cull later” is how 400 photos never become listings. No computer needed.',
   },
   {
-    id: 'wrap-edit',
-    label: 'Edit the keepers: white balance off the grey-card frame, straighten, crop, export ~2000 px WebP',
-    tip: 'One consistent treatment across the set — the collection page looks like one shop, not six different days. (The listing pipeline will automate this step.)',
-  },
-  {
-    id: 'wrap-upload',
-    label: 'Put the images in the site: public/images/products/, named after the piece',
-    tip: 'Drop them into the repo (or hand them to Claude to add and deploy).',
-  },
-  {
-    id: 'wrap-listings',
-    label: 'Create the listings in “Add a piece” with the measurements and voice notes',
-    tip: 'Everything you need was captured in the loop — this is copy-in work, not writing-from-scratch work.',
+    id: 'wrap-publish',
+    label: 'Publish each piece at “Add a piece” — straight from the phone',
+    tip: 'Open Add a piece, upload that piece’s photos, type the measurements and your one sentence. It crops, levels and resizes the photos and drafts the listing in your voice — you review, set the price, and publish. No transfer, no GIMP, no repo.',
   },
   {
     id: 'wrap-check',
@@ -153,7 +139,7 @@ const WRAP: Step[] = [
   {
     id: 'wrap-backup',
     label: 'Back up the raw photos',
-    tip: 'One-offs can’t be reshot after they sell. Google Photos, a drive — anywhere that isn’t only the phone.',
+    tip: 'The pipeline keeps the raws, but one-offs can’t be reshot after they sell. Google Photos, a drive — a second copy anywhere that isn’t only the phone.',
   },
 ];
 
@@ -336,7 +322,7 @@ export default function ShootChecklist() {
 
       {section(
         '4 · Wrap up & publish',
-        'From memory card to money: the same evening if you can — a shoot that isn’t published yet isn’t finished.',
+        'From camera roll to money, all on the phone — a shoot that isn’t published yet isn’t finished.',
         WRAP,
       )}
     </div>
