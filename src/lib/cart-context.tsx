@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
-import { PRODUCTS } from './products';
+import { useCatalog } from './catalog-context';
 
 type CartContextValue = {
   cartIds: string[];
@@ -15,23 +15,25 @@ const CartContext = createContext<CartContextValue | null>(null);
 const STORAGE_KEY = 'lp-cart';
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
+  const { products } = useCatalog();
   const [cartIds, setCartIds] = useState<string[]>([]);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
+    if (hydrated) return;
     try {
       const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
       if (Array.isArray(saved)) {
         // One-time hydration from a browser-only store (localStorage isn't available
         // during SSR), so this can't be computed as a lazy initial state.
         // eslint-disable-next-line react-hooks/set-state-in-effect
-        setCartIds(saved.filter((id: string) => PRODUCTS.some((p) => p.id === id)));
+        setCartIds(saved.filter((id: string) => products.some((p) => p.id === id)));
       }
     } catch {
       /* ignore malformed storage */
     }
     setHydrated(true);
-  }, []);
+  }, [hydrated, products]);
 
   useEffect(() => {
     if (!hydrated) return;

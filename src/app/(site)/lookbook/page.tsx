@@ -4,11 +4,12 @@ import { useRouter } from 'next/navigation';
 import Button from '@/components/Button';
 import LookbookGrid from '@/components/LookbookGrid';
 import LookbookEditorial from '@/components/LookbookEditorial';
-import { PRODUCTS } from '@/lib/products';
+import { useCatalog } from '@/lib/catalog-context';
 import styles from './LookbookPage.module.css';
 
 export default function LookbookPage() {
   const router = useRouter();
+  const { products } = useCatalog();
 
   return (
     <div className={styles.page} data-screen-label="Lookbook">
@@ -40,10 +41,10 @@ export default function LookbookPage() {
       </section>
       {/* Mobile: photo-forward editorial spread. Desktop: the grid, which already holds up at 1280. */}
       <section className={styles.editorial}>
-        <LookbookEditorial products={PRODUCTS} />
+        <LookbookEditorial products={products} />
       </section>
       <section className={styles.grid}>
-        <LookbookGrid products={PRODUCTS} />
+        <LookbookGrid products={products} />
       </section>
     </div>
   );
