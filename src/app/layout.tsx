@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Kaushan_Script, Playfair_Display, Work_Sans } from 'next/font/google';
 import './globals.css';
+import { Analytics } from '@vercel/analytics/next';
 
 // The catalog is read from the database on every request (stock changes as
 // pieces sell at markets), so the whole site renders dynamically.
@@ -34,7 +35,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${kaushan.variable} ${playfair.variable} ${workSans.variable}`}>
-      <body>{children}</body>
+      <body>
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }

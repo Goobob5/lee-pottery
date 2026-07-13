@@ -70,8 +70,24 @@
 }
 
 .panelList {
-  font: 400 14px/1.7 var(--font-sans);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font: 400 14px/1.5 var(--font-sans);
   color: var(--cobalt-700);
+}
+.panelList li {
+  position: relative;
+  padding-left: 16px;
+}
+.panelList li::before {
+  content: '·';
+  position: absolute;
+  left: 2px;
+  color: var(--cobalt-500);
 }
 
 .grid {
