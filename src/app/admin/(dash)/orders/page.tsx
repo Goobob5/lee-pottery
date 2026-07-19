@@ -27,7 +27,11 @@ export default async function OrdersPage() {
                 <span>{total}</span>
               </div>
               <span className={styles.orderDetail}>
-                {new Date(o.created_at).toLocaleString('en-AU', { dateStyle: 'medium', timeStyle: 'short' })}
+                {new Date(o.created_at).toLocaleString('en-AU', {
+                  dateStyle: 'medium',
+                  timeStyle: 'short',
+                  timeZone: 'Australia/Sydney',
+                })}
                 {' · '}
                 {o.product_ids.join(', ')}
               </span>

@@ -96,6 +96,33 @@ Vercel's Hobby plan prohibits commercial use — the shop needs Pro
 
 ---
 
+## Troubleshooting: payment succeeded but the piece isn't marked sold
+
+That symptom means the **webhook** didn't land — checkout, the hold, and the
+payment all worked; the mark-sold + order record are the webhook's job. The
+hold self-releases after ~35 minutes, so nothing stays stuck.
+
+**Look in two places:**
+
+1. **Stripe webhook delivery log** — with the **Test mode** toggle matching
+   the mode you purchased in: Developers → Webhooks (or Workbench →
+   Webhooks) → click the endpoint. Every delivery attempt is listed with its
+   HTTP status; click one to see the exact response body the site returned.
+2. **Vercel function logs** — project → Logs, filtered to
+   `/api/stripe-webhook` around the purchase time.
+
+| Symptom in Stripe | Cause | Fix |
+|---|---|---|
+| No endpoint listed (in the mode you bought in) | Webhooks are configured **per mode** — endpoint exists only in the other mode | Create the endpoint again in this mode, with this mode's signing secret |
+| 400 "Invalid signature" | `STRIPE_WEBHOOK_SECRET` doesn't match this endpoint (other mode's secret, or a deleted endpoint's) | Copy the signing secret from *this* endpoint → update Vercel env var → redeploy |
+| 500 "STRIPE_WEBHOOK_SECRET is not set…" | Env var missing, or added without redeploying | Add it / redeploy |
+| 307/308 redirect | Registered URL redirects (apex ↔ `www.`) and Stripe treats redirects as failures | Re-register with the host the site actually canonicalises to (copy it from the browser address bar) |
+| Endpoint exists, zero deliveries | Wrong events selected, or wrong path | Must be `checkout.session.completed` + `checkout.session.expired`, URL ending `/api/stripe-webhook` |
+
+**After fixing:** no need to buy again — open the failed delivery in Stripe
+and click **Resend**. Within seconds the piece should show Sold and the order
+should appear in `/admin/orders`.
+
 ## Final check
 
 1. `/admin` shows no database banner
