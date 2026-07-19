@@ -9,8 +9,8 @@
 
 A solo Sydney ceramicist sells one-of-a-kind and small-batch stoneware through
 two channels — his website (`leepottery.com.au`) and in-person market stalls —
-and runs the entire operation **from his phone**, with no computer, no design
-tools, and no code changes.
+and runs the day-to-day operation **from his phone**, with no code changes and
+no manual per-image editing.
 
 ## Primary persona: Richard Lee (owner, operator, and the only admin)
 
@@ -35,14 +35,20 @@ with occasional small batches (e.g. a run of six mugs).
 
 **His device and technical comfort.**
 
-- Everything operational happens on a **Samsung Galaxy S24+**. Photos are shot
+- Day-to-day operation happens on a **Samsung Galaxy S24+**. Photos are shot
   on the phone in a lightbox; listings are created at `/admin/new-piece` from
   the phone; stock is managed from the phone at the market stall.
-- He is **not a developer**. He does not use GIMP, does not commit to the repo,
-  and does not open a terminal. The go-live checklist is written click-by-click
-  for a browser because that is the right altitude. He builds the site by
-  directing Claude sessions (phased handoff docs in `docs/` are written for
-  fresh Claude sessions, not for him).
+- He **does have a computer and image-editing software (GIMP)** and is
+  comfortable using them — but he does not want to process images manually,
+  one at a time. What he wants is **bulk batch edits**: point a tool at a
+  shoot's worth of raw photos and have crop/level/resize/export happen across
+  all of them in one pass. Per-image hand-editing is the chore to eliminate,
+  whether that's on the phone or the desktop.
+- He is **not a developer**. He does not commit to the repo or open a
+  terminal. The go-live checklist is written click-by-click for a browser
+  because that is the right altitude. He builds the site by directing Claude
+  sessions (phased handoff docs in `docs/` are written for fresh Claude
+  sessions, not for him).
 - Phone keyboard **dictation stands in for voice notes** — he speaks a sentence
   about a piece rather than typing paragraphs. Don't build audio handling.
 - One admin, one password, a password manager. There will never be a second
@@ -63,11 +69,13 @@ with occasional small batches (e.g. a run of six mugs).
    real chore (the listing pipeline) — not for theoretical scale problems.
 
 **His main pain point (largely solved, keep it solved).** Listing a new piece
-used to mean a computer, image editing, and repo commits. The Phase 2 pipeline
-collapsed that to: shoot in the lightbox following the `/admin/shoot` SOP,
-upload the raws, type dims/weight/price and one sentence, review Claude's
-drafted fields, publish. Any new feature that reintroduces a desktop-only or
-code-editing step is a regression.
+used to mean hand-editing each photo in GIMP and committing files to the repo.
+The Phase 2 pipeline collapsed that to: shoot in the lightbox following the
+`/admin/shoot` SOP, upload the raws, type dims/weight/price and one sentence,
+review Claude's drafted fields, publish — the server batch-processes the whole
+set of photos automatically. Any new feature that reintroduces per-image
+manual editing or a code-editing step is a regression; desktop flows are fine
+as long as they operate in bulk.
 
 ## Secondary persona: the buyer
 
@@ -91,8 +99,13 @@ control, listing pipeline, photoshoot SOP, order log.
 
 ## Implications for new features
 
-- **Phone-first is a hard constraint.** Every admin flow must work one-handed
-  on a Galaxy S24+, possibly on market-day mobile data.
+- **Phone-first is the default, not phone-only.** Every admin flow must work
+  one-handed on a Galaxy S24+ (possibly on market-day mobile data); desktop is
+  an acceptable venue for heavier work, provided it's automated.
+- **Batch over per-item, everywhere.** Image processing — and any future
+  heavy operation — should run across a whole shoot or a whole set in one
+  pass. Never design a flow that asks Richard to repeat a manual step per
+  photo or per piece.
 - **Seconds matter at the stall**, not milliseconds online. Optimise the
   market-day loop (sell, un-sell, adjust stock) before anything else.
 - **Prefer removing steps over adding options.** Richard wants fewer chores,
