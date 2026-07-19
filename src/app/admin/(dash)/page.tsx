@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { hasDb, listProducts, type AdminProduct } from '@/lib/db';
-import { PRODUCTS } from '@/lib/products';
+import { PRODUCTS, FILTER_TYPES } from '@/lib/products';
 import { changeStockAction, markSoldInPersonAction } from '@/lib/admin-actions';
 import ConfirmButton from '../ConfirmButton';
 import styles from '../admin.module.css';
@@ -36,9 +36,17 @@ function statusFor(p: AdminProduct): { label: string; className: string } {
   };
 }
 
-export default async function AdminPiecesPage() {
+export default async function AdminPiecesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ type?: string }>;
+}) {
   const dbMode = hasDb();
-  const pieces = dbMode ? await listProducts() : fallbackPieces();
+  const all = dbMode ? await listProducts() : fallbackPieces();
+
+  const { type } = await searchParams;
+  const activeType = (FILTER_TYPES as readonly string[]).includes(type ?? '') ? type! : 'All';
+  const pieces = activeType === 'All' ? all : all.filter((p) => p.type === activeType);
 
   return (
     <>
@@ -46,7 +54,8 @@ export default async function AdminPiecesPage() {
         <div>
           <h1 className={styles.title}>Pieces</h1>
           <p className={styles.subtitle}>
-            Sold something at the stall? Tap “Sold at market” and it comes off the site straight away.
+            Sold something at the stall? Set the price it went for, tap “Sold at market”, and it comes
+            off the site straight away.
           </p>
         </div>
         {dbMode && (
@@ -54,6 +63,21 @@ export default async function AdminPiecesPage() {
             + Add a piece
           </Link>
         )}
+      </div>
+
+      <div className={styles.filters}>
+        {FILTER_TYPES.map((label) => {
+          const href = label === 'All' ? '/admin' : `/admin?type=${encodeURIComponent(label)}`;
+          return (
+            <Link
+              key={label}
+              href={href}
+              className={`${styles.filterChip} ${activeType === label ? styles.filterChipActive : ''}`}
+            >
+              {label}
+            </Link>
+          );
+        })}
       </div>
 
       <div className={styles.card}>
@@ -81,8 +105,21 @@ export default async function AdminPiecesPage() {
                 <div className={styles.pieceActions}>
                   {p.stock > 0 ? (
                     <>
-                      <form action={markSoldInPersonAction}>
+                      <form action={markSoldInPersonAction} className={styles.sellForm}>
                         <input type="hidden" name="id" value={p.id} />
+                        <label className={styles.priceField}>
+                          <span className={styles.pricePrefix}>$</span>
+                          <input
+                            type="number"
+                            name="price"
+                            defaultValue={p.price}
+                            step="1"
+                            min="0"
+                            inputMode="decimal"
+                            className={styles.priceInput}
+                            aria-label={`Sale price for ${p.name}`}
+                          />
+                        </label>
                         <ConfirmButton
                           message={`Mark one “${p.name}” as sold at the market? It comes off the website immediately.`}
                           className={`${styles.btn} ${styles.btnSmall}`}
@@ -119,7 +156,13 @@ export default async function AdminPiecesPage() {
             </div>
           );
         })}
-        {pieces.length === 0 && <div className={styles.emptyState}>No pieces yet — add your first one.</div>}
+        {pieces.length === 0 && (
+          <div className={styles.emptyState}>
+            {activeType === 'All'
+              ? 'No pieces yet — add your first one.'
+              : `No ${activeType.toLowerCase()} to show.`}
+          </div>
+        )}
       </div>
     </>
   );

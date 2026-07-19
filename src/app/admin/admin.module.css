@@ -89,6 +89,36 @@
   overflow: hidden;
 }
 
+/* ---- Piece type filters ---- */
+
+.filters {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.filterChip {
+  font: 600 13px/1 var(--font-sans);
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  text-decoration: none;
+  border: var(--border-width-default) solid var(--cobalt-200);
+  background: var(--white);
+  color: var(--cobalt-700);
+}
+
+.filterChip:hover {
+  background: var(--cobalt-50);
+}
+
+.filterChipActive,
+.filterChipActive:hover {
+  border-color: var(--cobalt-600);
+  background: var(--cobalt-600);
+  color: var(--white);
+}
+
 /* ---- Piece list ---- */
 
 .pieceRow {
@@ -161,6 +191,48 @@
 .actionRow {
   display: flex;
   gap: 6px;
+}
+
+/* Sold-at-market form: a price you can adjust before recording the sale. */
+.sellForm {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.priceField {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  border: var(--border-width-default) solid var(--cobalt-200);
+  border-radius: var(--radius-md);
+  background: var(--white);
+  padding: 0 8px;
+  min-height: 30px;
+}
+
+.priceField:focus-within {
+  outline: 2px solid var(--cobalt-400);
+  outline-offset: 1px;
+}
+
+.pricePrefix {
+  font-size: 13px;
+  color: var(--cobalt-400);
+}
+
+.priceInput {
+  font: inherit;
+  font-size: 13px;
+  border: none;
+  background: transparent;
+  color: var(--ink-900);
+  width: 56px;
+  padding: 4px 0;
+}
+
+.priceInput:focus {
+  outline: none;
 }
 
 .badge {
