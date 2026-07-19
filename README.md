@@ -1,5 +1,10 @@
 # Lee Pottery — website
 
+> **New here, or confused by "Phase 1/2/3"?** Start with
+> [`docs/OVERVIEW.md`](docs/OVERVIEW.md) — it maps your real-world process
+> against the website, explains what the phases mean, and shows what's built
+> vs. live vs. still-placeholder.
+
 Next.js implementation of the Lee Pottery site, built from the Claude Design
 handoff bundle at the repo root (see `../README.md`, `../chats/`, `../project/`).
 
