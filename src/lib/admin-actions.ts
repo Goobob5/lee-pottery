@@ -53,7 +53,14 @@ export async function markSoldInPersonAction(formData: FormData): Promise<void> 
   await requireAdmin();
   requireDb();
   const id = String(formData.get('id') ?? '');
-  if (id) await recordSale([id], 'in-person');
+  if (!id) return;
+  // Optional: the price it actually sold for in person. Blank/invalid falls
+  // back to the catalog price inside recordSale.
+  const rawPrice = String(formData.get('price') ?? '').trim();
+  const price = rawPrice === '' ? NaN : Number(rawPrice);
+  const priceOverrideCents =
+    Number.isFinite(price) && price >= 0 ? Math.round(price * 100) : undefined;
+  await recordSale([id], 'in-person', priceOverrideCents);
   refreshSite();
 }
 

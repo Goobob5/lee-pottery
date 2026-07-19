@@ -75,6 +75,20 @@ async function ensureSchema(sql: postgres.Sql): Promise<void> {
       shipping jsonb,
       created_at timestamptz NOT NULL DEFAULT now()
     )`;
+  // A running log of every sale — online and in person. The piece's name and
+  // sale price are copied in so the history survives even if the piece is
+  // later edited or deleted, and so an in-person sale can be recorded at the
+  // price it actually went for (a market haggle, a friend's discount).
+  await sql`
+    CREATE TABLE IF NOT EXISTS sales (
+      id serial PRIMARY KEY,
+      product_id text,
+      product_name text NOT NULL,
+      price_cents integer NOT NULL,
+      channel text NOT NULL,
+      note text,
+      sold_at timestamptz NOT NULL DEFAULT now()
+    )`;
 
   const [{ count }] = await sql`SELECT count(*)::int AS count FROM products`;
   if (count === 0) {
@@ -217,19 +231,52 @@ export async function releaseHolds(ids: string[]): Promise<void> {
 
 /**
  * Records a sale: one unit off each piece, holds cleared, and the piece
- * stamped with when/where it sold once the last unit goes.
+ * stamped with when/where it sold once the last unit goes. Every unit is also
+ * written to the `sales` log so there's a running history of what went and for
+ * how much.
+ *
+ * `priceOverrideCents` lets an in-person sale be logged at the price it
+ * actually sold for (only applied when a single piece is being recorded — the
+ * one path where the seller types a price). Online sales always log the
+ * catalog price.
  */
-export async function recordSale(ids: string[], channel: 'online' | 'in-person'): Promise<void> {
+export async function recordSale(
+  ids: string[],
+  channel: 'online' | 'in-person',
+  priceOverrideCents?: number,
+): Promise<void> {
   if (!ids.length) return;
   const sql = await db();
-  await sql`
-    UPDATE products
-    SET stock = GREATEST(stock - 1, 0),
-        reserved_until = NULL,
-        sold_at = CASE WHEN stock - 1 <= 0 THEN now() ELSE sold_at END,
-        sold_channel = CASE WHEN stock - 1 <= 0 THEN ${channel} ELSE sold_channel END,
-        updated_at = now()
-    WHERE id IN ${sql(ids)}`;
+  await sql.begin(async (tx) => {
+    const rows = await tx<{ id: string; name: string; price_cents: number }[]>`
+      SELECT id, name, price_cents FROM products WHERE id IN ${tx(ids)}`;
+    const byId = new Map(rows.map((r) => [r.id, r]));
+
+    await tx`
+      UPDATE products
+      SET stock = GREATEST(stock - 1, 0),
+          reserved_until = NULL,
+          sold_at = CASE WHEN stock - 1 <= 0 THEN now() ELSE sold_at END,
+          sold_channel = CASE WHEN stock - 1 <= 0 THEN ${channel} ELSE sold_channel END,
+          updated_at = now()
+      WHERE id IN ${tx(ids)}`;
+
+    for (const id of ids) {
+      const p = byId.get(id);
+      if (!p) continue;
+      const priceCents =
+        ids.length === 1 && priceOverrideCents != null && Number.isFinite(priceOverrideCents)
+          ? Math.max(0, Math.round(priceOverrideCents))
+          : p.price_cents;
+      await tx`
+        INSERT INTO sales ${tx({
+          product_id: id,
+          product_name: p.name,
+          price_cents: priceCents,
+          channel,
+        })}`;
+    }
+  });
 }
 
 /** Admin stock correction: put a piece back on the shelf or adjust a batch. */
@@ -331,4 +378,19 @@ export async function insertOrder(o: OrderInput): Promise<boolean> {
 export async function listOrders(): Promise<OrderRecord[]> {
   const sql = await db();
   return sql<OrderRecord[]>`SELECT * FROM orders ORDER BY created_at DESC LIMIT 200`;
+}
+
+export type SaleRecord = {
+  id: number;
+  product_id: string | null;
+  product_name: string;
+  price_cents: number;
+  channel: string;
+  sold_at: Date;
+};
+
+/** The full sales history — most recent first — for the admin sales log. */
+export async function listSales(): Promise<SaleRecord[]> {
+  const sql = await db();
+  return sql<SaleRecord[]>`SELECT * FROM sales ORDER BY sold_at DESC LIMIT 500`;
 }

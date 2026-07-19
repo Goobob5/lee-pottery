@@ -15,6 +15,7 @@ export default async function AdminLayout({ children }: Readonly<{ children: Rea
         <Link href="/admin/new-piece" className={styles.navLink}>Add a piece</Link>
         <Link href="/admin/shoot" className={styles.navLink}>Photoshoot day</Link>
         <Link href="/admin/orders" className={styles.navLink}>Orders</Link>
+        <Link href="/admin/sales" className={styles.navLink}>Sales log</Link>
         <span className={styles.navSpacer} />
         <Link href="/" className={styles.navLink}>View site</Link>
         <form action={logoutAction}>
