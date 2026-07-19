@@ -22,7 +22,12 @@ function statusFor(p: AdminProduct): { label: string; className: string } {
     return { label: ['Sold', channel].filter(Boolean).join(' '), className: 'badgeSold' };
   }
   if (p.oneOfAKind && p.reservedUntil && new Date(p.reservedUntil) > new Date()) {
-    const until = new Date(p.reservedUntil).toLocaleTimeString('en-AU', { hour: 'numeric', minute: '2-digit' });
+    // Rendered on the server (UTC on Vercel) — pin to Sydney time explicitly.
+    const until = new Date(p.reservedUntil).toLocaleTimeString('en-AU', {
+      hour: 'numeric',
+      minute: '2-digit',
+      timeZone: 'Australia/Sydney',
+    });
     return { label: `In a buyer's checkout until ${until}`, className: 'badgeReserved' };
   }
   return {
