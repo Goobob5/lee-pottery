@@ -35,6 +35,7 @@ export default async function OrdersPage() {
                 {' · '}
                 {o.product_ids.join(', ')}
               </span>
+              {o.shipping_option && <span className={styles.orderDetail}>Method: {o.shipping_option}</span>}
               {shipTo && <span className={styles.orderDetail}>Ship to: {shipTo}</span>}
               {o.email && <span className={styles.orderDetail}>{o.email}</span>}
             </div>

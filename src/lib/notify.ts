@@ -10,6 +10,7 @@ export type OrderNotification = {
   amountTotalCents: number | null;
   itemNames: string[];
   shippingSummary: string | null;
+  shippingOption: string | null;
 };
 
 export async function notifyNewOrder(order: OrderNotification): Promise<void> {
@@ -29,6 +30,7 @@ export async function notifyNewOrder(order: OrderNotification): Promise<void> {
     ...order.itemNames.map((n) => `• ${n}`),
     '',
     `Buyer: ${order.customerName ?? 'unknown'} (${order.email ?? 'no email'})`,
+    `Fulfilment: ${order.shippingOption ?? 'unknown'}`,
     order.shippingSummary ? `Ship to: ${order.shippingSummary}` : 'No shipping address collected.',
     '',
     'Full details are in the Stripe dashboard and /admin/orders.',
