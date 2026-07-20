@@ -92,6 +92,20 @@ async function ensureSchema(sql: postgres.Sql): Promise<void> {
       note text,
       sold_at timestamptz NOT NULL DEFAULT now()
     )`;
+  // Kiln-drop newsletter list. Opt-in only — a row here means someone asked to
+  // be told when new work drops, either from the home-page popup or by ticking
+  // the box at checkout. Email is stored lowercased so the UNIQUE constraint
+  // dedupes case-insensitively. `unsubscribed_at` is groundwork for a later
+  // self-service unsubscribe; nothing writes it yet.
+  await sql`
+    CREATE TABLE IF NOT EXISTS newsletter_subscribers (
+      id serial PRIMARY KEY,
+      email text UNIQUE NOT NULL,
+      source text NOT NULL,
+      consent_at timestamptz NOT NULL DEFAULT now(),
+      unsubscribed_at timestamptz,
+      created_at timestamptz NOT NULL DEFAULT now()
+    )`;
 
   const [{ count }] = await sql`SELECT count(*)::int AS count FROM products`;
   if (count === 0) {
@@ -399,4 +413,41 @@ export type SaleRecord = {
 export async function listSales(): Promise<SaleRecord[]> {
   const sql = await db();
   return sql<SaleRecord[]>`SELECT * FROM sales ORDER BY sold_at DESC LIMIT 500`;
+}
+
+export type NewsletterSource = 'home-popup' | 'checkout';
+
+export type SubscriberRecord = {
+  id: number;
+  email: string;
+  source: string;
+  consent_at: Date;
+  unsubscribed_at: Date | null;
+  created_at: Date;
+};
+
+/**
+ * Adds an opt-in to the kiln-drop list. Idempotent: a repeat sign-up (same
+ * email, any case) keeps the original row and its source/consent, so the first
+ * "how did they join" is never overwritten. Returns whether a new row was
+ * created — handy for showing "you're on the list" vs "welcome" copy.
+ */
+export async function addSubscriber(
+  email: string,
+  source: NewsletterSource,
+): Promise<{ created: boolean }> {
+  const normalized = email.trim().toLowerCase();
+  const sql = await db();
+  const rows = await sql`
+    INSERT INTO newsletter_subscribers ${sql({ email: normalized, source })}
+    ON CONFLICT (email) DO NOTHING
+    RETURNING id`;
+  return { created: rows.length > 0 };
+}
+
+/** The whole list, newest first — for the admin newsletter view and export. */
+export async function listSubscribers(): Promise<SubscriberRecord[]> {
+  const sql = await db();
+  return sql<SubscriberRecord[]>`
+    SELECT * FROM newsletter_subscribers ORDER BY created_at DESC`;
 }

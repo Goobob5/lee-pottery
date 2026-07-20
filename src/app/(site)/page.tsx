@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Button from '@/components/Button';
 import ProductPhoto from '@/components/ProductPhoto';
 import LookbookGrid from '@/components/LookbookGrid';
+import NewsletterPopup from '@/components/NewsletterPopup';
 import { useProductModal } from '@/lib/product-modal-context';
 import { useCatalog } from '@/lib/catalog-context';
 import { SCHEDULE, MARKET_LINE } from '@/lib/schedule';
@@ -169,6 +170,8 @@ export default function Home() {
           ))}
         </div>
       </section>
+
+      <NewsletterPopup />
     </div>
   );
 }

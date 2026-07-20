@@ -1,21 +1,50 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useProductModal } from '@/lib/product-modal-context';
 import { useCart } from '@/lib/cart-context';
 import { useCatalog } from '@/lib/catalog-context';
 import { recommendationsFor } from '@/lib/products';
+import { piecePath } from '@/lib/site';
 import PieceGallery from './PieceGallery';
 import Button from './Button';
 import styles from './PieceModal.module.css';
 
+function ShareIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="18" cy="5" r="3" />
+      <circle cx="6" cy="12" r="3" />
+      <circle cx="18" cy="19" r="3" />
+      <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+      <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+    </svg>
+  );
+}
+
 export default function PieceModal() {
-  const { openId, openProduct, closeModal } = useProductModal();
+  const { openProduct, closeModal } = useProductModal();
   const { addToCart, isInCart } = useCart();
   const { products, getProduct } = useCatalog();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const [shareState, setShareState] = useState<'idle' | 'copied'>('idle');
+
+  // The open piece lives in the URL — see product-modal-context. Reading it here
+  // (behind the layout's Suspense boundary) keeps the shared site layout static.
+  const openId = searchParams.get('piece');
+
+  useEffect(() => {
+    if (!openId) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') closeModal();
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [openId, closeModal]);
 
   if (!openId) return null;
   const cur = getProduct(openId);
@@ -34,6 +63,29 @@ export default function PieceModal() {
     router.push(`/enquire?topic=${encodeURIComponent('A commission')}&similar=${encodeURIComponent(cur!.name)}`);
   }
 
+  // Share the canonical collection URL for this piece — honest wherever the
+  // modal was opened from. Uses the native share sheet on phones, falls back to
+  // copying the link with brief confirmation.
+  async function sharePiece() {
+    const url = `${window.location.origin}${piecePath(cur!.id)}`;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: cur!.name, url });
+        return;
+      } catch {
+        // Cancelled or unsupported — fall through to copying instead.
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      setShareState('copied');
+      setTimeout(() => setShareState('idle'), 2000);
+    } catch {
+      // Clipboard blocked (e.g. insecure context) — surface the link to copy by hand.
+      window.prompt('Copy this link', url);
+    }
+  }
+
   return (
     <div className={styles.backdrop} onClick={closeModal}>
       <div className={styles.modal} onClick={stop} data-screen-label="Piece modal">
@@ -44,7 +96,18 @@ export default function PieceModal() {
         <div className={styles.top}>
           <PieceGallery product={cur} priority />
           <div className={styles.info}>
-            <span className={styles.kicker}>{kicker}</span>
+            <div className={styles.kickerRow}>
+              <span className={styles.kicker}>{kicker}</span>
+              <button type="button" className={styles.shareBtn} onClick={sharePiece}>
+                {shareState === 'copied' ? (
+                  'Link copied ✓'
+                ) : (
+                  <>
+                    <ShareIcon /> Share
+                  </>
+                )}
+              </button>
+            </div>
             <h2 className={styles.title}>{cur.name}</h2>
             <p className={styles.desc}>{cur.desc}</p>
 

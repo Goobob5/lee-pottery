@@ -309,6 +309,21 @@
   min-height: 30px;
 }
 
+/* ---- Newsletter export ---- */
+
+.newsletterTools {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: var(--space-4);
+}
+.newsletterTools a.btn {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
 /* ---- Forms ---- */
 
 .form {

@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import type Stripe from 'stripe';
 import { getStripe } from '@/lib/stripe';
-import { getProductById, hasDb, insertOrder, recordSale, releaseHolds } from '@/lib/db';
+import { addSubscriber, getProductById, hasDb, insertOrder, recordSale, releaseHolds } from '@/lib/db';
+import { CATALOG_TAG } from '@/lib/catalog';
 import { notifyNewOrder } from '@/lib/notify';
+import { parseEmail } from '@/lib/newsletter';
 
 /**
  * Stripe webhook: the moment a checkout completes, take the pieces off the
@@ -72,6 +75,11 @@ export async function POST(request: NextRequest) {
         const soldPieces = await Promise.all(productIds.map((id) => getProductById(id)));
         const itemNames = productIds.map((id, i) => soldPieces[i]?.name ?? id);
         await recordSale(productIds, 'online');
+        // The sold piece must leave the public site immediately, so the
+        // cached catalog is expired (not lazily revalidated) and the
+        // prerendered pages are marked stale.
+        revalidateTag(CATALOG_TAG, { expire: 0 });
+        revalidatePath('/', 'layout');
         const shippingSummary = address
           ? [address.line1, address.line2, address.city, address.state, address.postal_code]
               .filter(Boolean)
@@ -85,6 +93,17 @@ export async function POST(request: NextRequest) {
           shippingSummary,
           shippingOption,
         });
+      }
+
+      // Checkout newsletter opt-in: only if they ticked the box and Stripe gave
+      // us a usable email. Guarded by isNew so a webhook retry can't re-add.
+      if (isNew && session.metadata?.newsletter_opt_in === 'true') {
+        const email = parseEmail(details?.email);
+        if (email) {
+          await addSubscriber(email, 'checkout').catch((e) =>
+            console.error('Checkout newsletter opt-in failed:', e),
+          );
+        }
       }
     } else if (event.type === 'checkout.session.expired') {
       const session = event.data.object;

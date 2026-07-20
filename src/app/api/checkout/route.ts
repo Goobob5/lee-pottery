@@ -7,9 +7,11 @@ const SHIPPING_CENTS = 2500;
 
 export async function POST(request: NextRequest) {
   let ids: unknown;
+  let newsletterOptIn = false;
   try {
     const body = await request.json();
     ids = body?.ids;
+    newsletterOptIn = body?.newsletterOptIn === true;
   } catch {
     return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
   }
@@ -125,7 +127,12 @@ export async function POST(request: NextRequest) {
       expires_at: Math.floor(Date.now() / 1000) + CHECKOUT_SESSION_MINUTES * 60,
       success_url: `${origin}/order-confirmed?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/cart`,
-      metadata: { product_ids: items.map((p) => p.id).join(',') },
+      // The opt-in rides through to the webhook, which pairs it with the email
+      // Stripe collects and adds them to the kiln-drop list if they ticked it.
+      metadata: {
+        product_ids: items.map((p) => p.id).join(','),
+        newsletter_opt_in: newsletterOptIn ? 'true' : 'false',
+      },
     });
 
     if (!session.url) {
