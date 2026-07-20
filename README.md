@@ -116,8 +116,6 @@ rest render as labeled "Photo coming soon" frames:
   per-size bands remain a deferred simplification — the shipped rate is flat.
 - **Stripe Checkout collects shipping address and card details itself**
   (hosted, PCI-compliant) — there's no custom checkout form in this app.
-- Product images aren't passed to Stripe Checkout line items (would need a
-  publicly reachable HTTPS URL, which only exists once this is deployed).
 
 ## Deploying
 

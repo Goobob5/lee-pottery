@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { PRODUCTS, Product } from '@/lib/products';
 import { getStripe } from '@/lib/stripe';
 import { CHECKOUT_SESSION_MINUTES, hasDb, holdForCheckout, releaseHolds } from '@/lib/db';
+import { pieceImageUrl } from '@/lib/site';
 
 const SHIPPING_CENTS = 2500;
 
@@ -78,24 +79,34 @@ export async function POST(request: NextRequest) {
   const lineItems: Array<{
     price_data: {
       currency: string;
-      product_data: { name: string; description?: string };
+      product_data: { name: string; description?: string; images?: string[] };
       unit_amount: number;
     };
     quantity: number;
-  }> = items.map((p) => ({
-    price_data: {
-      currency: 'aud',
-      product_data: { name: p.name, description: p.meta },
-      unit_amount: Math.round(p.price * 100),
-    },
-    quantity: 1,
-  }));
+  }> = items.map((p) => {
+    // Show the actual piece on the Stripe payment page. Reuses the shared
+    // absolute-URL helper (Blob URLs pass through; repo/public paths get the
+    // site's base URL). Omitted when the piece has no photo — Stripe just
+    // ignores an unreachable image, so checkout never fails over one.
+    const img = pieceImageUrl(p);
+    return {
+      price_data: {
+        currency: 'aud',
+        product_data: { name: p.name, description: p.meta, ...(img ? { images: [img] } : {}) },
+        unit_amount: Math.round(p.price * 100),
+      },
+      quantity: 1,
+    };
+  });
 
   try {
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       line_items: lineItems,
       shipping_address_collection: { allowed_countries: ['AU'] },
+      // Hand out cards at the market with a code (created in the Stripe
+      // dashboard) and let browsers become online buyers later.
+      allow_promotion_codes: true,
       // Shipping is chosen by the buyer, priced server-side (never trust the
       // client). Free local pickup collects $0; shipping stays a flat rate.
       shipping_options: [
