@@ -108,9 +108,12 @@ rest render as labeled "Photo coming soon" frames:
   for the seed catalog, repo files under `public/images/products/`. The database
   stores whichever URL/path applies and the site renders both — remote Blob URLs
   are allow-listed for `next/image` in `next.config.ts`.
-- **Shipping is a flat $25 line item** — real price bands and free
-  market-pickup options are Phase 3 (`SHIPPING_CENTS` in
-  `src/app/api/checkout/route.ts`).
+- **Shipping** is offered at checkout as two Stripe `shipping_options`: free
+  local pickup (arranged by email — studio in Rosebery, home in Surry Hills, or
+  the next market) and a **flat $25** shipped rate (`SHIPPING_CENTS` in
+  `src/app/api/checkout/route.ts`). The buyer's choice is recorded on the order
+  (`/admin/orders`, the notification email, and the confirmation page). Priced
+  per-size bands remain a deferred simplification — the shipped rate is flat.
 - **Stripe Checkout collects shipping address and card details itself**
   (hosted, PCI-compliant) — there's no custom checkout form in this app.
 

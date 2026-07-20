@@ -1,60 +1,75 @@
-'use client';
+import type { Metadata } from 'next';
+import { getCatalog, getCatalogProduct } from '@/lib/catalog';
+import { pieceImageUrl, pieceUrl, productJsonLd } from '@/lib/site';
+import CollectionGrid from './CollectionGrid';
 
-import { useState } from 'react';
-import ProductPhoto from '@/components/ProductPhoto';
-import { useProductModal } from '@/lib/product-modal-context';
-import { useCatalog } from '@/lib/catalog-context';
-import { FILTER_TYPES } from '@/lib/products';
-import styles from './CollectionPage.module.css';
+type Props = {
+  searchParams: Promise<{ piece?: string | string[] }>;
+};
 
-export default function CollectionPage() {
-  const { openProduct } = useProductModal();
-  const { products } = useCatalog();
-  const [filter, setFilter] = useState<string>('All');
+function pieceIdOf(sp: { piece?: string | string[] }): string | null {
+  const v = sp.piece;
+  return (Array.isArray(v) ? v[0] : v) ?? null;
+}
 
-  const list = products.filter((p) => filter === 'All' || p.type === filter);
+const COLLECTION_META: Metadata = {
+  title: 'The collection',
+  description: 'One-of-a-kind ceramics and small batches, thrown by hand in Sydney by Richard Lee.',
+  alternates: { canonical: '/collection' },
+};
+
+// When the collection page is opened to a specific piece (`?piece=…`), the
+// metadata describes that piece so a shared/pasted link unfurls as the piece —
+// its photo, name and price — rather than a generic site card.
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+  const id = pieceIdOf(await searchParams);
+  if (!id) return COLLECTION_META;
+
+  const p = await getCatalogProduct(id);
+  if (!p) return COLLECTION_META;
+
+  const image = pieceImageUrl(p);
+  const priceLine = p.sold ? 'Sold' : `$${p.price} AUD`;
+  const description = `${p.desc} — ${priceLine}.`;
+  const ogTitle = `${p.name} — Lee Pottery`;
+
+  return {
+    title: p.name,
+    description,
+    alternates: { canonical: pieceUrl(p.id) },
+    openGraph: {
+      type: 'website',
+      title: ogTitle,
+      description,
+      url: pieceUrl(p.id),
+      siteName: 'Lee Pottery',
+      images: image ? [{ url: image, alt: p.name }] : undefined,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: ogTitle,
+      description,
+      images: image ? [image] : undefined,
+    },
+  };
+}
+
+export default async function CollectionRoute({ searchParams }: Props) {
+  const [products, sp] = await Promise.all([getCatalog(), searchParams]);
+  const id = pieceIdOf(sp);
+  const piece = id ? products.find((p) => p.id === id) ?? null : null;
 
   return (
-    <div className={styles.page} data-screen-label="Collection">
-      <div className={styles.header}>
-        <h1 className={styles.title}>The collection</h1>
-        <span className={styles.count}>{list.length} {list.length === 1 ? 'piece' : 'pieces'}</span>
-      </div>
-      <p className={styles.subtitle}>Most pieces exist once — when they&rsquo;re gone, they&rsquo;re gone. Small batches are noted.</p>
-
-      <div className={styles.filters}>
-        {FILTER_TYPES.map((label) => (
-          <button
-            key={label}
-            className={`${styles.filterChip} ${filter === label ? styles.active : ''}`}
-            onClick={() => setFilter(label)}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
-
-      <div className={styles.grid}>
-        {list.map((p) => {
-          const showBadge = !p.sold && p.oneOfAKind;
-          return (
-            <button key={p.id} className={styles.card} onClick={() => openProduct(p.id)}>
-              <div className={styles.photoWrap}>
-                <ProductPhoto product={p} className={styles.photo} sizes="(max-width: 1040px) 50vw, 33vw" />
-                {p.sold && <span className={`${styles.badge} ${styles.badgeSold}`}>Sold</span>}
-                {showBadge && <span className={`${styles.badge} ${styles.badgeOneOfAKind}`}>One of a kind</span>}
-              </div>
-              <div className={styles.cardRow}>
-                <span className={styles.cardName}>{p.name}</span>
-                <span className={`${styles.cardPrice} ${p.sold ? styles.priceSold : styles.priceAvailable}`}>
-                  ${p.price}
-                </span>
-              </div>
-              <span className={styles.cardMeta}>{p.meta}</span>
-            </button>
-          );
-        })}
-      </div>
-    </div>
+    <>
+      {piece && (
+        <script
+          type="application/ld+json"
+          // schema.org Product data so Google can index the piece with its price
+          // and availability. Regenerated per request from live catalog data.
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd(piece)) }}
+        />
+      )}
+      <CollectionGrid />
+    </>
   );
 }

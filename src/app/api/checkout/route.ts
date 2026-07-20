@@ -2,32 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { PRODUCTS, Product } from '@/lib/products';
 import { getStripe } from '@/lib/stripe';
 import { CHECKOUT_SESSION_MINUTES, hasDb, holdForCheckout, releaseHolds } from '@/lib/db';
+import { pieceImageUrl } from '@/lib/site';
 
 const SHIPPING_CENTS = 2500;
 
-/**
- * A photo URL Stripe's servers can actually fetch, or null to skip it.
- * Blob URLs are already public; repo/public paths (`/images/…`, `/uploads/…`)
- * only resolve once prefixed with a public https origin — in local dev
- * (localhost) there's no reachable URL, so we send no image rather than a
- * link Stripe can't load.
- */
-function publicImageUrl(image: string | null | undefined, origin: string): string | null {
-  if (!image) return null;
-  if (/^https?:\/\//.test(image)) return image;
-  if (image.startsWith('/')) {
-    const url = new URL(origin);
-    const isLocal = url.hostname === 'localhost' || url.hostname === '127.0.0.1';
-    if (url.protocol === 'https:' && !isLocal) return `${origin}${image}`;
-  }
-  return null;
-}
-
 export async function POST(request: NextRequest) {
   let ids: unknown;
+  let newsletterOptIn = false;
   try {
     const body = await request.json();
     ids = body?.ids;
+    newsletterOptIn = body?.newsletterOptIn === true;
   } catch {
     return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
   }
@@ -99,7 +84,11 @@ export async function POST(request: NextRequest) {
     };
     quantity: number;
   }> = items.map((p) => {
-    const img = publicImageUrl(p.image, origin);
+    // Show the actual piece on the Stripe payment page. Reuses the shared
+    // absolute-URL helper (Blob URLs pass through; repo/public paths get the
+    // site's base URL). Omitted when the piece has no photo — Stripe just
+    // ignores an unreachable image, so checkout never fails over one.
+    const img = pieceImageUrl(p);
     return {
       price_data: {
         currency: 'aud',
@@ -110,15 +99,6 @@ export async function POST(request: NextRequest) {
     };
   });
 
-  lineItems.push({
-    price_data: {
-      currency: 'aud',
-      product_data: { name: 'Shipping — packed by me, insured' },
-      unit_amount: SHIPPING_CENTS,
-    },
-    quantity: 1,
-  });
-
   try {
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
@@ -127,15 +107,43 @@ export async function POST(request: NextRequest) {
       // Hand out cards at the market with a code (created in the Stripe
       // dashboard) and let browsers become online buyers later.
       allow_promotion_codes: true,
-      // Let buyers tick "email me about new pieces" — recorded with the order
-      // by the webhook so the mailing list is seeded with real consenting buyers.
-      consent_collection: { promotions: 'auto' },
+      // Shipping is chosen by the buyer, priced server-side (never trust the
+      // client). Free local pickup collects $0; shipping stays a flat rate.
+      shipping_options: [
+        {
+          shipping_rate_data: {
+            type: 'fixed_amount',
+            fixed_amount: { amount: 0, currency: 'aud' },
+            display_name: 'Free local pickup (Sydney)',
+          },
+        },
+        {
+          shipping_rate_data: {
+            type: 'fixed_amount',
+            fixed_amount: { amount: SHIPPING_CENTS, currency: 'aud' },
+            display_name: 'Shipped — packed by me, insured',
+          },
+        },
+      ],
+      // Stripe shipping rates have no per-option description, so the pickup
+      // logistics live here, next to the pay button.
+      custom_text: {
+        submit: {
+          message:
+            "Choosing free pickup? I'll email to arrange a time — from my studio in Rosebery, my home in Surry Hills, or the next market. No postage charged.",
+        },
+      },
       // The session and the one-of-a-kind holds expire together (Stripe's
       // minimum is 30 minutes; the hold is slightly longer on purpose).
       expires_at: Math.floor(Date.now() / 1000) + CHECKOUT_SESSION_MINUTES * 60,
       success_url: `${origin}/order-confirmed?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/cart`,
-      metadata: { product_ids: items.map((p) => p.id).join(',') },
+      // The opt-in rides through to the webhook, which pairs it with the email
+      // Stripe collects and adds them to the kiln-drop list if they ticked it.
+      metadata: {
+        product_ids: items.map((p) => p.id).join(','),
+        newsletter_opt_in: newsletterOptIn ? 'true' : 'false',
+      },
     });
 
     if (!session.url) {

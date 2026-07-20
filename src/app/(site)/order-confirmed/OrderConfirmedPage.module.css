@@ -32,6 +32,13 @@
   color: var(--cobalt-700);
 }
 
+.total {
+  margin: 0;
+  font: 500 14px/1.5 var(--font-sans);
+  letter-spacing: 0.02em;
+  color: var(--cobalt-600);
+}
+
 .signature {
   font: 400 28px/1 var(--font-script);
   color: var(--cobalt-600);

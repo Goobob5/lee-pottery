@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import type Stripe from 'stripe';
 import { getStripe } from '@/lib/stripe';
-import { getProductById, hasDb, insertOrder, recordSale, releaseHolds } from '@/lib/db';
+import { addSubscriber, getProductById, hasDb, insertOrder, recordSale, releaseHolds } from '@/lib/db';
+import { CATALOG_TAG } from '@/lib/catalog';
 import { notifyNewOrder } from '@/lib/notify';
+import { parseEmail } from '@/lib/newsletter';
 
 /**
  * Stripe webhook: the moment a checkout completes, take the pieces off the
@@ -50,15 +53,12 @@ export async function POST(request: NextRequest) {
 
       const details = session.customer_details;
       const address = details?.address;
-      // Did the buyer tick "email me about new pieces"? Stored so Epic 4 can
-      // seed its list with buyers who actually opted in. Null when the box
-      // wasn't shown (Stripe decides per the buyer's location).
-      const marketingConsent =
-        session.consent?.promotions === 'opt_in'
-          ? true
-          : session.consent?.promotions === 'opt_out'
-            ? false
-            : null;
+      // The two shipping options differ only by price ($0 pickup vs a flat
+      // shipped rate), so the collected amount tells us which the buyer chose —
+      // no extra API call needed to expand the shipping rate.
+      const cost = session.shipping_cost;
+      const shippingOption =
+        cost == null ? null : cost.amount_total === 0 ? 'Free local pickup' : 'Shipped — packed by me, insured';
       const isNew = await insertOrder({
         stripeSessionId: session.id,
         email: details?.email ?? null,
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
         amountTotalCents: session.amount_total,
         productIds,
         shipping: address ?? null,
-        marketingConsent,
+        shippingOption,
       });
 
       // insertOrder is the idempotency gate: Stripe retries deliveries, and
@@ -75,6 +75,11 @@ export async function POST(request: NextRequest) {
         const soldPieces = await Promise.all(productIds.map((id) => getProductById(id)));
         const itemNames = productIds.map((id, i) => soldPieces[i]?.name ?? id);
         await recordSale(productIds, 'online');
+        // The sold piece must leave the public site immediately, so the
+        // cached catalog is expired (not lazily revalidated) and the
+        // prerendered pages are marked stale.
+        revalidateTag(CATALOG_TAG, { expire: 0 });
+        revalidatePath('/', 'layout');
         const shippingSummary = address
           ? [address.line1, address.line2, address.city, address.state, address.postal_code]
               .filter(Boolean)
@@ -86,7 +91,19 @@ export async function POST(request: NextRequest) {
           amountTotalCents: session.amount_total,
           itemNames,
           shippingSummary,
+          shippingOption,
         });
+      }
+
+      // Checkout newsletter opt-in: only if they ticked the box and Stripe gave
+      // us a usable email. Guarded by isNew so a webhook retry can't re-add.
+      if (isNew && session.metadata?.newsletter_opt_in === 'true') {
+        const email = parseEmail(details?.email);
+        if (email) {
+          await addSubscriber(email, 'checkout').catch((e) =>
+            console.error('Checkout newsletter opt-in failed:', e),
+          );
+        }
       }
     } else if (event.type === 'checkout.session.expired') {
       const session = event.data.object;
