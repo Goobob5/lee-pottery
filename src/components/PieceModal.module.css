@@ -66,11 +66,36 @@
   }
 }
 
+.kickerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .kicker {
   font: 600 12px/1 var(--font-sans);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--cobalt-500);
+}
+
+.shareBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  padding: 7px 13px;
+  border-radius: 99px;
+  border: 1px solid var(--cream-300);
+  background: var(--white);
+  color: var(--cobalt-700);
+  font: 600 12.5px/1 var(--font-sans);
+  cursor: pointer;
+}
+.shareBtn:hover {
+  border-color: var(--cobalt-400);
+  color: var(--cobalt-900);
 }
 
 .title {
