@@ -1,16 +1,17 @@
-# Phase 2 — The listing pipeline
+# The listing pipeline — build plan
 
 > Handoff plan for a fresh Claude session. Written 2026-07-11, immediately after
-> Phase 1 (PR #8, branch `claude/lee-pottery-ecommerce-e20o8p`). Read this whole
-> file, then AGENTS.md, before writing code.
+> the shop shipped (PR #8, branch `claude/lee-pottery-ecommerce-e20o8p`). Read
+> this whole file, then AGENTS.md, before writing code. (The shop and this
+> pipeline were originally called Phase 1 and Phase 2 — see `OVERVIEW.md`.)
 
 ## Goal
 
 Kill the listing headache. Richard shoots pieces on his Galaxy S24+ in a
 lightbox (the SOP at `/admin/shoot` produces ~5 raw photos + measurements +
-a spoken/typed sentence per piece). Phase 2 turns that raw material into a
-published listing **from the phone, with no computer, no GIMP, and no repo
-commits**:
+a spoken/typed sentence per piece). The listing pipeline turns that raw
+material into a published listing **from the phone, with no computer, no GIMP,
+and no repo commits**:
 
 1. `/admin/new-piece`: upload the raw photos, type dims/weight/price and one
    sentence about the piece (phone keyboard dictation covers "voice notes" —
@@ -25,7 +26,7 @@ The user chose "Automate everything, I edit drafts" — AI may draft all fields
 including the personal note, but everything passes through his review before
 publish. Never auto-publish.
 
-## What already exists (Phase 1 — read these files first)
+## What already exists (the shop — read these files first)
 
 | Thing | Where |
 |---|---|
@@ -35,7 +36,7 @@ publish. Never auto-publish.
 | Server actions incl. `saveProductAction` | `src/lib/admin-actions.ts` |
 | Admin UI + shared styles | `src/app/admin/(dash)/*`, `src/app/admin/admin.module.css` |
 | Product create/edit form | `src/app/admin/(dash)/products/ProductForm.tsx` — the review screen should reuse/extend this |
-| Photoshoot SOP | `src/app/admin/(dash)/shoot/ShootChecklist.tsx` — update its wrap-up steps once upload exists (they currently say "drop files into the repo / Phase 2 will automate this") |
+| Photoshoot SOP | `src/app/admin/(dash)/shoot/ShootChecklist.tsx` — update its wrap-up steps once upload exists (they currently say "drop files into the repo / the listing pipeline will automate this") |
 | Env var docs | `.env.example`, README |
 
 ## Architecture decisions (made — don't relitigate)
@@ -124,7 +125,7 @@ publish. Never auto-publish.
   `DATABASE_URL=postgres://lee:lee@localhost:5432/leepottery` (create role
   `lee`/`lee` + db `leepottery` if the container is fresh). Schema
   auto-creates and seeds on first request.
-- End-to-end verification pattern from Phase 1: run `npm run dev -- --port
+- End-to-end verification pattern from the shop build: run `npm run dev -- --port
   3111` with env vars, drive it with Playwright (`npm install playwright` in
   the scratchpad, launch with `executablePath: '/opt/pw-browsers/chromium'`
   — do NOT `playwright install`). Kill dev servers with `fuser -k
@@ -141,14 +142,14 @@ publish. Never auto-publish.
 
 ## Git / PR
 
-Branch `claude/lee-pottery-ecommerce-e20o8p`; Phase 1 is PR #8.
-- If PR #8 is **unmerged**: continue committing on the same branch (Phase 2
-  extends the same PR) — or ask Richard if he'd rather stack it separately.
+Branch `claude/lee-pottery-ecommerce-e20o8p`; the shop is PR #8.
+- If PR #8 is **unmerged**: continue committing on the same branch (the listing
+  pipeline extends the same PR) — or ask Richard if he'd rather stack it separately.
 - If PR #8 is **merged**: reset the branch from latest main
   (`git fetch origin main && git checkout -B claude/lee-pottery-ecommerce-e20o8p origin/main`),
-  build Phase 2 there, push, open a **new draft PR**.
+  build the listing pipeline there, push, open a **new draft PR**.
 
-## Out of scope (Phase 3+)
+## Out of scope (shipping & fulfilment, and beyond)
 
 - Shipping price bands + free market-pickup / local-pickup options in Stripe
   Checkout (replace the hardcoded `SHIPPING_CENTS` in

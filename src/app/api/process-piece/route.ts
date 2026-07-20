@@ -10,7 +10,7 @@ import { readFile, storeFile } from '@/lib/storage';
  * backup for one-off pieces; this only writes the processed versions.
  *
  * White balance is left to `normalise()` + Richard's review for v1 — a
- * grey-card-accurate sampler is a Phase 3 stretch goal, not a blocker.
+ * grey-card-accurate sampler is a later stretch goal, not a blocker.
  */
 
 // Route handlers default to the Node runtime; sharp needs it (not Edge).

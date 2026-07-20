@@ -1,8 +1,8 @@
 # Lee Pottery — website
 
-> **New here, or confused by "Phase 1/2/3"?** Start with
-> [`docs/OVERVIEW.md`](docs/OVERVIEW.md) — it maps your real-world process
-> against the website, explains what the phases mean, and shows what's built
+> **New here?** Start with [`docs/OVERVIEW.md`](docs/OVERVIEW.md) — it maps
+> your real-world process against the website, names the build stages (the
+> shop → the listing pipeline → shipping & fulfilment), and shows what's built
 > vs. live vs. still-placeholder.
 
 Next.js implementation of the Lee Pottery site, built from the Claude Design
@@ -109,8 +109,8 @@ rest render as labeled "Photo coming soon" frames:
   stores whichever URL/path applies and the site renders both — remote Blob URLs
   are allow-listed for `next/image` in `next.config.ts`.
 - **Shipping is a flat $25 line item** — real price bands and free
-  market-pickup options are Phase 3 (`SHIPPING_CENTS` in
-  `src/app/api/checkout/route.ts`).
+  market-pickup options are the shipping & fulfilment stage, not yet built
+  (`SHIPPING_CENTS` in `src/app/api/checkout/route.ts`).
 - **Stripe Checkout collects shipping address and card details itself**
   (hosted, PCI-compliant) — there's no custom checkout form in this app.
 - Product images aren't passed to Stripe Checkout line items (would need a
