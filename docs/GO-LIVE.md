@@ -67,6 +67,12 @@ mode.
    in live mode provides the live `whsec_...`. Redeploy.
 5. Extras: Settings → Emails → enable **Successful payments** (buyer
    receipts), and install the **Stripe mobile app** for sale notifications.
+6. **Wallet payments (Apple Pay / Google Pay):** Settings → Payment methods →
+   enable **Apple Pay** and **Google Pay** for the live account. On hosted
+   Checkout Stripe auto-registers the domain, so no code change is needed —
+   but confirm it worked: open the live checkout on a phone and check the
+   one-tap wallet button appears above the card fields. One thumb-press
+   instead of typing card details converts far better on mobile.
 
 ## 4. Resend (optional "you sold something" email)
 
@@ -130,4 +136,5 @@ should appear in `/admin/orders`.
 3. Test-mode purchase marks the piece sold + logs the order + green webhook ✓
 4. Live key + live webhook set, redeployed
 5. Pro plan active
-6. Replace the placeholder pieces via `/admin` — and you're trading.
+6. Wallet (Apple/Google Pay) button appears on a phone test checkout
+7. Replace the placeholder pieces via `/admin` — and you're trading.
