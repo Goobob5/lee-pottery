@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { getCatalog } from '@/lib/catalog';
 import { CatalogProvider } from '@/lib/catalog-context';
 import { CartProvider } from '@/lib/cart-context';
@@ -16,7 +17,11 @@ export default async function SiteLayout({ children }: Readonly<{ children: Reac
           <Header />
           <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>{children}</main>
           <Footer />
-          <PieceModal />
+          {/* Suspense boundary: PieceModal reads the ?piece search param, which
+              would otherwise opt the statically-rendered site pages into CSR. */}
+          <Suspense fallback={null}>
+            <PieceModal />
+          </Suspense>
         </ProductModalProvider>
       </CartProvider>
     </CatalogProvider>

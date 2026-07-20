@@ -4,10 +4,6 @@ import './globals.css';
 import { Analytics } from '@vercel/analytics/next';
 import { siteUrl } from '@/lib/site';
 
-// The catalog is read from the database on every request (stock changes as
-// pieces sell at markets), so the whole site renders dynamically.
-export const dynamic = 'force-dynamic';
-
 const kaushan = Kaushan_Script({
   weight: '400',
   subsets: ['latin'],

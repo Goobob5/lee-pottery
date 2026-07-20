@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useProductModal } from '@/lib/product-modal-context';
 import { useCart } from '@/lib/cart-context';
 import { useCatalog } from '@/lib/catalog-context';
@@ -26,11 +26,25 @@ function ShareIcon() {
 }
 
 export default function PieceModal() {
-  const { openId, openProduct, closeModal } = useProductModal();
+  const { openProduct, closeModal } = useProductModal();
   const { addToCart, isInCart } = useCart();
   const { products, getProduct } = useCatalog();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [shareState, setShareState] = useState<'idle' | 'copied'>('idle');
+
+  // The open piece lives in the URL — see product-modal-context. Reading it here
+  // (behind the layout's Suspense boundary) keeps the shared site layout static.
+  const openId = searchParams.get('piece');
+
+  useEffect(() => {
+    if (!openId) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') closeModal();
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [openId, closeModal]);
 
   if (!openId) return null;
   const cur = getProduct(openId);
