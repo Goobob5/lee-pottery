@@ -50,6 +50,12 @@ export async function POST(request: NextRequest) {
 
       const details = session.customer_details;
       const address = details?.address;
+      // The two shipping options differ only by price ($0 pickup vs a flat
+      // shipped rate), so the collected amount tells us which the buyer chose —
+      // no extra API call needed to expand the shipping rate.
+      const cost = session.shipping_cost;
+      const shippingOption =
+        cost == null ? null : cost.amount_total === 0 ? 'Free local pickup' : 'Shipped — packed by me, insured';
       const isNew = await insertOrder({
         stripeSessionId: session.id,
         email: details?.email ?? null,
@@ -57,6 +63,7 @@ export async function POST(request: NextRequest) {
         amountTotalCents: session.amount_total,
         productIds,
         shipping: address ?? null,
+        shippingOption,
       });
 
       // insertOrder is the idempotency gate: Stripe retries deliveries, and
@@ -76,6 +83,7 @@ export async function POST(request: NextRequest) {
           amountTotalCents: session.amount_total,
           itemNames,
           shippingSummary,
+          shippingOption,
         });
       }
     } else if (event.type === 'checkout.session.expired') {

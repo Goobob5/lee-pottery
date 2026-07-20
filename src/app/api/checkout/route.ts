@@ -89,20 +89,37 @@ export async function POST(request: NextRequest) {
     quantity: 1,
   }));
 
-  lineItems.push({
-    price_data: {
-      currency: 'aud',
-      product_data: { name: 'Shipping — packed by me, insured' },
-      unit_amount: SHIPPING_CENTS,
-    },
-    quantity: 1,
-  });
-
   try {
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       line_items: lineItems,
       shipping_address_collection: { allowed_countries: ['AU'] },
+      // Shipping is chosen by the buyer, priced server-side (never trust the
+      // client). Free local pickup collects $0; shipping stays a flat rate.
+      shipping_options: [
+        {
+          shipping_rate_data: {
+            type: 'fixed_amount',
+            fixed_amount: { amount: 0, currency: 'aud' },
+            display_name: 'Free local pickup (Sydney)',
+          },
+        },
+        {
+          shipping_rate_data: {
+            type: 'fixed_amount',
+            fixed_amount: { amount: SHIPPING_CENTS, currency: 'aud' },
+            display_name: 'Shipped — packed by me, insured',
+          },
+        },
+      ],
+      // Stripe shipping rates have no per-option description, so the pickup
+      // logistics live here, next to the pay button.
+      custom_text: {
+        submit: {
+          message:
+            "Choosing free pickup? I'll email to arrange a time — from my studio in Rosebery, my home in Surry Hills, or the next market. No postage charged.",
+        },
+      },
       // The session and the one-of-a-kind holds expire together (Stripe's
       // minimum is 30 minutes; the hold is slightly longer on purpose).
       expires_at: Math.floor(Date.now() / 1000) + CHECKOUT_SESSION_MINUTES * 60,
