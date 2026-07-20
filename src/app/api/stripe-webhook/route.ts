@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import type Stripe from 'stripe';
 import { getStripe } from '@/lib/stripe';
 import { addSubscriber, getProductById, hasDb, insertOrder, recordSale, releaseHolds } from '@/lib/db';
+import { CATALOG_TAG } from '@/lib/catalog';
 import { notifyNewOrder } from '@/lib/notify';
 import { parseEmail } from '@/lib/newsletter';
 
@@ -66,6 +68,11 @@ export async function POST(request: NextRequest) {
         const soldPieces = await Promise.all(productIds.map((id) => getProductById(id)));
         const itemNames = productIds.map((id, i) => soldPieces[i]?.name ?? id);
         await recordSale(productIds, 'online');
+        // The sold piece must leave the public site immediately, so the
+        // cached catalog is expired (not lazily revalidated) and the
+        // prerendered pages are marked stale.
+        revalidateTag(CATALOG_TAG, { expire: 0 });
+        revalidatePath('/', 'layout');
         const shippingSummary = address
           ? [address.line1, address.line2, address.city, address.state, address.postal_code]
               .filter(Boolean)
