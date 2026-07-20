@@ -151,6 +151,13 @@ export default async function AdminPiecesPage({
                       </button>
                     </form>
                   )}
+                  <Link
+                    href={`/admin/products/${p.id}/duplicate`}
+                    className={`${styles.btn} ${styles.btnGhost} ${styles.btnSmall}`}
+                    style={{ textDecoration: 'none', whiteSpace: 'nowrap' }}
+                  >
+                    Duplicate
+                  </Link>
                 </div>
               )}
             </div>

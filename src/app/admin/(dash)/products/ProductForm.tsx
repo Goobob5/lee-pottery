@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { FILTER_TYPES } from '@/lib/products';
 import type { AdminProduct } from '@/lib/db';
 import type { ListingDraft } from '@/lib/listing';
@@ -18,16 +19,26 @@ type ProductFormProps = {
   heroIndex?: number;
   /** Default for the "one of a kind" checkbox (from the piece's kind). */
   defaultOneOfAKind?: boolean;
+  /** Prefill from `piece` but save as a NEW piece (Duplicate/relist flow):
+   * no hidden id (a fresh slug is derived), name suffixed "(copy)", stock reset. */
+  duplicate?: boolean;
 };
 
 /** Shared create/edit form. Server-rendered on purpose — plain HTML forms
  * posting to server actions work on a flaky market-day connection. Also used
  * as the listing-pipeline review screen: pass `draft` + `photos` to prefill
- * from the AI and swap the manual photo-path fields for a reorderable strip. */
-export default function ProductForm({ piece, draft, photos, heroIndex = 0, defaultOneOfAKind }: ProductFormProps) {
-  const editing = !!piece;
+ * from the AI and swap the manual photo-path fields for a reorderable strip.
+ * Pass `duplicate` with a `piece` to relist a copy: same prefill, but saved as
+ * a new piece via the unchanged `saveProductAction`, never touching the original. */
+export default function ProductForm({ piece, draft, photos, heroIndex = 0, defaultOneOfAKind, duplicate }: ProductFormProps) {
+  // When duplicating we prefill from `piece` but are NOT editing it — omitting
+  // the hidden id makes saveProductAction derive a new slug from the name.
+  const editing = !!piece && !duplicate;
   const reviewing = !!photos;
   const oneOfAKindDefault = piece?.oneOfAKind ?? defaultOneOfAKind ?? true;
+  const nameDefault = duplicate && piece ? `${piece.name} (copy)` : (piece?.name ?? draft?.name);
+  // "everything except stock" — a copy starts at the base default, not the source count.
+  const stockDefault = duplicate ? 1 : (piece?.stock ?? 1);
 
   return (
     <>
@@ -36,7 +47,7 @@ export default function ProductForm({ piece, draft, photos, heroIndex = 0, defau
 
         <div className={styles.field}>
           <label className={styles.label} htmlFor="name">Name</label>
-          <input id="name" name="name" className={styles.input} defaultValue={piece?.name ?? draft?.name} required />
+          <input id="name" name="name" className={styles.input} defaultValue={nameDefault} required />
           {!editing && <span className={styles.hint}>The web address is made from the name automatically.</span>}
         </div>
 
@@ -71,7 +82,7 @@ export default function ProductForm({ piece, draft, photos, heroIndex = 0, defau
             <label className={styles.label} htmlFor="stock">Stock</label>
             <input
               id="stock" name="stock" type="number" min="0" step="1" inputMode="numeric"
-              className={styles.input} defaultValue={piece?.stock ?? 1} required
+              className={styles.input} defaultValue={stockDefault} required
             />
           </div>
         </div>
@@ -139,20 +150,30 @@ export default function ProductForm({ piece, draft, photos, heroIndex = 0, defau
         )}
 
         <div className={styles.formActions}>
-          <button type="submit" className={styles.btn}>{editing ? 'Save changes' : reviewing ? 'Publish piece' : 'Add piece'}</button>
+          <button type="submit" className={styles.btn}>{editing ? 'Save changes' : reviewing ? 'Publish piece' : duplicate ? 'Add copy' : 'Add piece'}</button>
         </div>
       </form>
 
       {editing && (
-        <form action={deleteProductAction}>
-          <input type="hidden" name="id" value={piece.id} />
-          <ConfirmButton
-            message={`Delete “${piece.name}” for good? If it just sold, mark it sold instead so it shows as “found a home”.`}
-            className={`${styles.btn} ${styles.btnDanger}`}
+        <>
+          <Link
+            href={`/admin/products/${piece.id}/duplicate`}
+            className={`${styles.btn} ${styles.btnGhost}`}
+            style={{ textDecoration: 'none' }}
           >
-            Delete this piece
-          </ConfirmButton>
-        </form>
+            Duplicate this piece
+          </Link>
+
+          <form action={deleteProductAction}>
+            <input type="hidden" name="id" value={piece.id} />
+            <ConfirmButton
+              message={`Delete “${piece.name}” for good? If it just sold, mark it sold instead so it shows as “found a home”.`}
+              className={`${styles.btn} ${styles.btnDanger}`}
+            >
+              Delete this piece
+            </ConfirmButton>
+          </form>
+        </>
       )}
     </>
   );
