@@ -3,10 +3,6 @@ import { Kaushan_Script, Playfair_Display, Work_Sans } from 'next/font/google';
 import './globals.css';
 import { Analytics } from '@vercel/analytics/next';
 
-// The catalog is read from the database on every request (stock changes as
-// pieces sell at markets), so the whole site renders dynamically.
-export const dynamic = 'force-dynamic';
-
 const kaushan = Kaushan_Script({
   weight: '400',
   subsets: ['latin'],

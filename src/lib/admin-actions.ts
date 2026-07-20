@@ -1,6 +1,6 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, updateTag } from 'next/cache';
 import { redirect } from 'next/navigation';
 import {
   adminConfigured,
@@ -18,6 +18,7 @@ import {
   upsertProduct,
   type ProductInput,
 } from './db';
+import { CATALOG_TAG } from './catalog';
 
 export type LoginState = { error: string } | null;
 
@@ -38,8 +39,12 @@ export async function logoutAction(): Promise<void> {
   redirect('/admin/login');
 }
 
-/** Everything below mutates the catalog, so the whole site cache is refreshed. */
+/** Everything below mutates the catalog, so the whole site cache is refreshed.
+ * `updateTag` expires the cached catalog read immediately (read-your-writes —
+ * "Sold at market" must take effect in seconds), and `revalidatePath` marks
+ * the prerendered pages stale so they re-render against the fresh catalog. */
 function refreshSite() {
+  updateTag(CATALOG_TAG);
   revalidatePath('/', 'layout');
 }
 
