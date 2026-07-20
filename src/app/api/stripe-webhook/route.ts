@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import type Stripe from 'stripe';
 import { getStripe } from '@/lib/stripe';
-import { getProductById, hasDb, insertOrder, recordSale, releaseHolds } from '@/lib/db';
+import { addSubscriber, getProductById, hasDb, insertOrder, recordSale, releaseHolds } from '@/lib/db';
 import { notifyNewOrder } from '@/lib/notify';
+import { parseEmail } from '@/lib/newsletter';
 
 /**
  * Stripe webhook: the moment a checkout completes, take the pieces off the
@@ -77,6 +78,17 @@ export async function POST(request: NextRequest) {
           itemNames,
           shippingSummary,
         });
+      }
+
+      // Checkout newsletter opt-in: only if they ticked the box and Stripe gave
+      // us a usable email. Guarded by isNew so a webhook retry can't re-add.
+      if (isNew && session.metadata?.newsletter_opt_in === 'true') {
+        const email = parseEmail(details?.email);
+        if (email) {
+          await addSubscriber(email, 'checkout').catch((e) =>
+            console.error('Checkout newsletter opt-in failed:', e),
+          );
+        }
       }
     } else if (event.type === 'checkout.session.expired') {
       const session = event.data.object;

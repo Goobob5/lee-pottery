@@ -19,6 +19,7 @@ export default function CartPage() {
   const { products } = useCatalog();
   const [checkingOut, setCheckingOut] = useState(false);
   const [error, setError] = useState('');
+  const [newsletterOptIn, setNewsletterOptIn] = useState(false);
 
   const cartProducts = cartIds.map((id) => products.find((p) => p.id === id)).filter((p): p is Product => !!p);
   const subtotal = cartProducts.reduce((sum, p) => sum + p.price, 0);
@@ -31,7 +32,7 @@ export default function CartPage() {
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ids: cartProducts.map((p) => p.id) }),
+        body: JSON.stringify({ ids: cartProducts.map((p) => p.id), newsletterOptIn }),
       });
       const data = await res.json();
       if (!res.ok || !data.url) throw new Error(data.error || 'Could not start checkout');
@@ -81,6 +82,14 @@ export default function CartPage() {
                 <span>${total}</span>
               </div>
               {error && <span className={styles.errorMsg}>{error}</span>}
+              <label className={styles.newsletterOptIn}>
+                <input
+                  type="checkbox"
+                  checked={newsletterOptIn}
+                  onChange={(e) => setNewsletterOptIn(e.target.checked)}
+                />
+                <span>Notify me about future kiln drops — first look when new work lands.</span>
+              </label>
               <div className={styles.actions}>
                 <Button size="lg" onClick={handleCheckout} disabled={checkingOut}>
                   {checkingOut ? 'Redirecting…' : 'Check out'}
