@@ -135,6 +135,24 @@
   color: var(--cobalt-900);
 }
 
+.newsletterOptIn {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 20px;
+  cursor: pointer;
+  font: 400 14.5px/1.5 var(--font-sans);
+  color: var(--cobalt-700);
+}
+.newsletterOptIn input {
+  margin-top: 2px;
+  width: 17px;
+  height: 17px;
+  accent-color: var(--cobalt-600);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
 .actions {
   display: flex;
   gap: 14px;
