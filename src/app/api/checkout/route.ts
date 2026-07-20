@@ -5,6 +5,24 @@ import { CHECKOUT_SESSION_MINUTES, hasDb, holdForCheckout, releaseHolds } from '
 
 const SHIPPING_CENTS = 2500;
 
+/**
+ * A photo URL Stripe's servers can actually fetch, or null to skip it.
+ * Blob URLs are already public; repo/public paths (`/images/…`, `/uploads/…`)
+ * only resolve once prefixed with a public https origin — in local dev
+ * (localhost) there's no reachable URL, so we send no image rather than a
+ * link Stripe can't load.
+ */
+function publicImageUrl(image: string | null | undefined, origin: string): string | null {
+  if (!image) return null;
+  if (/^https?:\/\//.test(image)) return image;
+  if (image.startsWith('/')) {
+    const url = new URL(origin);
+    const isLocal = url.hostname === 'localhost' || url.hostname === '127.0.0.1';
+    if (url.protocol === 'https:' && !isLocal) return `${origin}${image}`;
+  }
+  return null;
+}
+
 export async function POST(request: NextRequest) {
   let ids: unknown;
   try {
@@ -76,18 +94,21 @@ export async function POST(request: NextRequest) {
   const lineItems: Array<{
     price_data: {
       currency: string;
-      product_data: { name: string; description?: string };
+      product_data: { name: string; description?: string; images?: string[] };
       unit_amount: number;
     };
     quantity: number;
-  }> = items.map((p) => ({
-    price_data: {
-      currency: 'aud',
-      product_data: { name: p.name, description: p.meta },
-      unit_amount: Math.round(p.price * 100),
-    },
-    quantity: 1,
-  }));
+  }> = items.map((p) => {
+    const img = publicImageUrl(p.image, origin);
+    return {
+      price_data: {
+        currency: 'aud',
+        product_data: { name: p.name, description: p.meta, ...(img ? { images: [img] } : {}) },
+        unit_amount: Math.round(p.price * 100),
+      },
+      quantity: 1,
+    };
+  });
 
   lineItems.push({
     price_data: {
@@ -103,6 +124,12 @@ export async function POST(request: NextRequest) {
       mode: 'payment',
       line_items: lineItems,
       shipping_address_collection: { allowed_countries: ['AU'] },
+      // Hand out cards at the market with a code (created in the Stripe
+      // dashboard) and let browsers become online buyers later.
+      allow_promotion_codes: true,
+      // Let buyers tick "email me about new pieces" — recorded with the order
+      // by the webhook so the mailing list is seeded with real consenting buyers.
+      consent_collection: { promotions: 'auto' },
       // The session and the one-of-a-kind holds expire together (Stripe's
       // minimum is 30 minutes; the hold is slightly longer on purpose).
       expires_at: Math.floor(Date.now() / 1000) + CHECKOUT_SESSION_MINUTES * 60,

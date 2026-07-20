@@ -73,8 +73,12 @@ async function ensureSchema(sql: postgres.Sql): Promise<void> {
       amount_total_cents integer,
       product_ids jsonb NOT NULL DEFAULT '[]',
       shipping jsonb,
+      marketing_consent boolean,
       created_at timestamptz NOT NULL DEFAULT now()
     )`;
+  // Added after the orders table first shipped — CREATE TABLE IF NOT EXISTS
+  // won't add it to an existing database, so bring older tables up to date.
+  await sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS marketing_consent boolean`;
   // A running log of every sale — online and in person. The piece's name and
   // sale price are copied in so the history survives even if the piece is
   // later edited or deleted, and so an in-person sale can be recorded at the
@@ -345,6 +349,7 @@ export type OrderInput = {
   amountTotalCents: number | null;
   productIds: string[];
   shipping: unknown;
+  marketingConsent: boolean | null;
 };
 
 export type OrderRecord = {
@@ -355,6 +360,7 @@ export type OrderRecord = {
   amount_total_cents: number | null;
   product_ids: string[];
   shipping: { line1?: string; line2?: string; city?: string; state?: string; postal_code?: string } | null;
+  marketing_consent: boolean | null;
   created_at: Date;
 };
 
@@ -369,6 +375,7 @@ export async function insertOrder(o: OrderInput): Promise<boolean> {
       amount_total_cents: o.amountTotalCents,
       product_ids: sql.json(o.productIds),
       shipping: o.shipping == null ? null : sql.json(o.shipping as never),
+      marketing_consent: o.marketingConsent,
     })}
     ON CONFLICT (stripe_session_id) DO NOTHING
     RETURNING id`;

@@ -50,6 +50,15 @@ export async function POST(request: NextRequest) {
 
       const details = session.customer_details;
       const address = details?.address;
+      // Did the buyer tick "email me about new pieces"? Stored so Epic 4 can
+      // seed its list with buyers who actually opted in. Null when the box
+      // wasn't shown (Stripe decides per the buyer's location).
+      const marketingConsent =
+        session.consent?.promotions === 'opt_in'
+          ? true
+          : session.consent?.promotions === 'opt_out'
+            ? false
+            : null;
       const isNew = await insertOrder({
         stripeSessionId: session.id,
         email: details?.email ?? null,
@@ -57,6 +66,7 @@ export async function POST(request: NextRequest) {
         amountTotalCents: session.amount_total,
         productIds,
         shipping: address ?? null,
+        marketingConsent,
       });
 
       // insertOrder is the idempotency gate: Stripe retries deliveries, and
