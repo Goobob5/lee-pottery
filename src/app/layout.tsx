@@ -23,6 +23,9 @@ const workSans = Work_Sans({
   variable: '--font-work-sans',
 });
 
+/** Site-wide share card, resolved against `metadataBase`. */
+const OG_IMAGE = '/images/og/lee-pottery.webp';
+
 export const metadata: Metadata = {
   // Lets per-page metadata use relative URLs (canonical, og:image) that resolve
   // against the site's real origin. Per-piece pages override these fields.
@@ -37,6 +40,17 @@ export const metadata: Metadata = {
     title: 'Lee Pottery — from my hands, to your home',
     description:
       'Sculpture and tableware thrown by hand in Sydney. One-of-a-kind ceramics and small batches by Richard Lee.',
+    // The site-wide share card. Without it, the bare domain — the link on a
+    // market card or handed round in a message — unfurls as text only. Piece
+    // pages override this with their own photo.
+    images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: 'A Lee Pottery swan platter, cobalt on speckled stoneware' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Lee Pottery — from my hands, to your home',
+    description:
+      'Sculpture and tableware thrown by hand in Sydney. One-of-a-kind ceramics and small batches by Richard Lee.',
+    images: [OG_IMAGE],
   },
 };
 

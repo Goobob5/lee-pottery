@@ -63,7 +63,10 @@ export default function CartPage() {
               {cartProducts.map((p) => (
                 <div key={p.id} className={styles.item}>
                   <div className={styles.itemPhoto}>
-                    <ProductPhoto product={p} sizes="110px" />
+                    {/* The frame around this sets the size; without an explicit
+                        height the photo's own wrapper collapses to zero and the
+                        thumbnail renders blank. */}
+                    <ProductPhoto product={p} sizes="110px" height="100%" />
                   </div>
                   <div className={styles.itemInfo}>
                     <span className={styles.itemName}>{p.name}</span>
