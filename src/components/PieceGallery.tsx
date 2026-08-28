@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import type { Product } from '@/lib/products';
+import { piecePhotos } from '@/lib/site';
 import styles from './PieceGallery.module.css';
 
 type PieceGalleryProps = {
@@ -13,9 +14,9 @@ type PieceGalleryProps = {
 /** The piece's main photo(s), shown uncropped (never covers/crops the piece).
  * Most products only have one photo today, so this renders as a single plain
  * frame — the swipeable/thumbnail-strip gallery activates automatically once
- * a product's `photos` array holds more than one image. */
+ * a piece has more than one photo (hero plus extras). */
 export default function PieceGallery({ product, priority = false }: PieceGalleryProps) {
-  const photos = product.photos && product.photos.length > 0 ? product.photos : product.image ? [product.image] : [];
+  const photos = piecePhotos(product);
   const [active, setActive] = useState(0);
 
   if (photos.length === 0) {

@@ -47,10 +47,25 @@ export function absoluteMediaUrl(src: string | null | undefined): string | null 
   return `${siteUrl()}/${src.replace(/^\/+/, '')}`;
 }
 
+/**
+ * Every photo of a piece, hero first.
+ *
+ * The listing pipeline splits a piece's shots across two fields: `image` holds
+ * the hero and `photos` holds only the *remaining* shots (see `PhotoStrip`,
+ * which writes `image = order[0]` and `photos = order.slice(1)`). So the full
+ * set is the hero followed by the extras — reading `photos` alone silently
+ * drops the hero and promotes the second shot. Duplicates are removed so a
+ * piece edited by hand, repeating the hero path in `photos`, still behaves.
+ *
+ * Pure — no env access — so it is safe to use on the client.
+ */
+export function piecePhotos(p: Product): string[] {
+  return [...new Set([p.image, ...(p.photos ?? [])].filter((s): s is string => !!s))];
+}
+
 /** The piece's hero photo as an absolute URL, or null if it has none yet. */
 export function pieceImageUrl(p: Product): string | null {
-  const hero = (p.photos && p.photos.length > 0 ? p.photos[0] : p.image) ?? null;
-  return absoluteMediaUrl(hero);
+  return absoluteMediaUrl(piecePhotos(p)[0] ?? null);
 }
 
 /**
